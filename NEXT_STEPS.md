@@ -34,6 +34,17 @@
 - [x] **Control de versiones:** repo git inicializado (rama `main`, commit inicial `836eac1`),
       con `.env` y venvs excluidos. — [ID-T07]
 
+## Publicación y despliegue (política del harness — `CLAUDE.md §9`)
+
+- [ ] **Remoto:** publicar el repo local en GitHub y/o GitLab (`git remote add` + `git push`
+      de `main`). Requiere `gh`/credenciales o un remoto creado. — [CLAUDE.md §9.1]
+- [ ] **Despliegue SSH (definir al publicar):** al subir el repo, si el despliegue no está
+      definido, agregar **todo lo necesario**: clave SSH, IP del servidor, host, usuario,
+      ruta de destino y método de sync (`git pull`/`rsync`/hook). — [CLAUDE.md §9.2]
+- [ ] **Servidor de despliegue:** provisionar **PostgreSQL** + Python 3.11+ con venv y deps,
+      `.env` del server (con `SECRET_KEY` fuerte, `COOKIE_SECURE=True`, `CORS_ORIGINS` real),
+      `alembic upgrade head` y `python -m database.seed`. — [CLAUDE.md §9.3]
+
 ## Fase 2 — Funcionalidad (de `PromptModelo`)
 
 - [ ] **Reportes:** OT por período / por técnico / por cliente-vehículo. — [ID-T08]

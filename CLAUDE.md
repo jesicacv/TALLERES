@@ -141,3 +141,38 @@ tiene unittest configurado (`.vscode/settings.json`).
 La config MCP del proyecto vive en `.mcp.json` (raíz) — un servidor PostgreSQL apuntando
 a `${DATABASE_URL}`. Requiere Node/`npx`. Si no usás MCP, podés ignorarlo; no es necesario
 para correr la app ni los tests.
+
+## 9. Repositorio remoto y despliegue
+
+### 9.1 Sincronización con remoto (obligatorio)
+
+Las publicaciones del repositorio local **deben sincronizarse con un remoto en GitHub y/o
+GitLab**. Al publicar: configurar el/los remoto(s) (`git remote add ...`) y hacer `git push`
+de la rama `main`. Una vez que se decide publicar, el repo no debe quedar solo en disco.
+
+### 9.2 Despliegue en el servidor vía SSH (a definir al publicar)
+
+El repositorio **debe sincronizarse con el servidor de despliegue mediante técnicas de
+despliegue por SSH**.
+
+> **Por ahora esto queda solo enunciado.** Cuando se suba/publique el repositorio, si la
+> configuración de despliegue **no está definida**, se debe agregar en ese momento **todo lo
+> necesario** para el despliegue. Parámetros a completar (TBD):
+>
+> - Clave SSH (par pública/privada) — TBD
+> - IP del servidor — TBD
+> - Host / hostname — TBD
+> - Usuario de despliegue — TBD
+> - Ruta de destino en el servidor — TBD
+> - Método de sincronización (p. ej. `git pull` en el server, `rsync`, o hook de deploy) — TBD
+
+### 9.3 Requisitos del servidor de despliegue (obligatorio)
+
+El servidor de despliegue **debe contar con PostgreSQL** y con **todo lo necesario para el
+correcto funcionamiento del sistema**:
+
+- **PostgreSQL** instalado y accesible (base creada según `.env`).
+- **Python 3.11+** con un entorno virtual y las dependencias de `requirements.txt`.
+- **Variables de entorno** (`.env`) configuradas para el server, con `SECRET_KEY` fuerte,
+  `COOKIE_SECURE=True` (si hay HTTPS) y `CORS_ORIGINS` del dominio real.
+- **Esquema migrado** (`alembic upgrade head`) y **datos base sembrados** (`python -m database.seed`).
