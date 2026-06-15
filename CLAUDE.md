@@ -138,9 +138,28 @@ tiene unittest configurado (`.vscode/settings.json`).
 
 ## 8. MCP
 
-La config MCP del proyecto vive en `.mcp.json` (raíz) — un servidor PostgreSQL apuntando
-a `${DATABASE_URL}`. Requiere Node/`npx`. Si no usás MCP, podés ignorarlo; no es necesario
-para correr la app ni los tests.
+La config MCP del proyecto vive en `.mcp.json` (raíz). Servidores:
+
+- **`postgres_taller`** — PostgreSQL apuntando a `${DATABASE_URL}`. Requiere Node/`npx`.
+- **`github`** — servidor remoto oficial de GitHub (`https://api.githubcopilot.com/mcp/`),
+  autenticado con `Authorization: Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}`. No requiere Docker
+  ni instalación local. Habilita las operaciones de GitHub del harness ([§9.1](#91-sincronización-con-remoto-obligatorio)).
+
+**Setup del MCP de GitHub:**
+
+1. Crear un **Personal Access Token** en GitHub (fine-grained o classic con scope `repo`).
+2. Exponerlo como **variable de entorno** antes de lanzar el agente (el `${...}` de `.mcp.json`
+   se expande desde el entorno del proceso, **no** desde `.env`):
+   ```powershell
+   setx GITHUB_PERSONAL_ACCESS_TOKEN "ghp_xxx"   # persistente (reabrir terminal)
+   # o por sesión:  $env:GITHUB_PERSONAL_ACCESS_TOKEN = "ghp_xxx"
+   ```
+3. El token **nunca** se hardcodea en `.mcp.json` (que está versionado) ni se commitea.
+
+> Alternativa sin remoto (si se prefiere local): servidor oficial vía Docker
+> `ghcr.io/github/github-mcp-server` con `GITHUB_PERSONAL_ACCESS_TOKEN`. Requiere Docker.
+
+Si no usás MCP, podés ignorarlo; no es necesario para correr la app ni los tests.
 
 ## 9. Repositorio remoto y despliegue
 
