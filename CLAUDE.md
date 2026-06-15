@@ -13,6 +13,20 @@ documentación (`.md`), los textos de UI y los mensajes de error/validación. Id
 de código (nombres de variables, funciones, rutas) pueden quedar en inglés si así está la
 convención existente, pero todo lo legible por humanos se redacta en español.
 
+## 0.1 Reglas de trabajo del agente (obligatorias)
+
+- **Prompt de continuidad en cada update de NEXT_STEPS:** cada vez que se solicite actualizar
+  los próximos pasos (`NEXT_STEPS.md`), el agente **debe** entregar además un **prompt de
+  continuidad** (resumen de estado + dónde retomar) para poder reanudar el trabajo en otra sesión.
+- **Apegarse a lo indicado, dentro de harness / spec / stack:** seguir siempre lo solicitado y
+  mantenerse **dentro de las consideraciones del harness** (este `CLAUDE.md`), la **especificación**
+  ([`PromptModelo_TallerMecanico.md`](PromptModelo_TallerMecanico.md)) y el **stack técnico**
+  ([`TECH_STACK.md`](TECH_STACK.md)). No introducir tecnologías, patrones ni dependencias fuera de
+  eso sin acuerdo previo.
+- **Ante dudas, consultar y ofrecer opciones — no afirmar resoluciones:** si hay ambigüedad o más
+  de un camino válido, **preguntar** y **presentar opciones** con sus implicancias, en lugar de
+  afirmar una resolución como única o ya decidida.
+
 ## 1. Qué es esto
 
 App web interna para administrar un taller mecánico: clientes y vehículos, órdenes de
