@@ -43,7 +43,7 @@ TALLERES/
 │   ├── base.py             # engine, SessionLocal, Base, get_db()
 │   └── seed.py             # roles/permisos base + usuario admin
 ├── alembic/                # migraciones
-├── tests/test_smoke.py     # suite de integración (unittest)
+├── tests/                  # suite unittest: smoke, costos, seguridad-sync, auth-sessions
 ├── requirements.txt
 ├── lanzar_app.bat / run_dev.ps1   # lanzadores dev (Windows)
 └── .env / .env.example
@@ -102,7 +102,7 @@ tiene unittest configurado (`.vscode/settings.json`).
 - **Claves naturales normalizadas:** `rut`, `patente`, `codigo` se guardan con `.strip().upper()`. Replicar al crear/editar/buscar.
 - **Errores de integridad:** envolver `db.commit()` en `try/except IntegrityError` → `rollback()` + `HTTPException(400, detail=...)` con mensaje en español.
 - **Enums** centralizados en `app/models/enums.py` (`StrEnum`). Reusar, no redefinir strings.
-- **Cálculos de negocio** (totales mano de obra/repuestos, IVA 19%) viven en el router de `movimientos`. Si crecen, moverlos a un service antes de duplicarlos.
+- **Cálculos de negocio:** los totales de mano de obra/IVA 19% viven en `app/services/costos_service.py` (`calcular_totales_mano_obra`, con tests en `tests/test_costos.py`). Nuevos cálculos de negocio van a un service, no inline en el router.
 - **HTMX:** patrones en `PromptModelo §8` (hx-get a modal, hx-post actualiza tabla, hx-delete con confirmación). Sin JavaScript a mano.
 
 ### Autenticación web (sesión por cookie)

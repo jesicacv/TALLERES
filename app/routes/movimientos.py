@@ -22,6 +22,7 @@ from app.models.tecnico import Tecnico
 from app.models.usuario import Usuario
 from app.models.vehiculo import Vehiculo
 from app.services.audit_service import log_audit, model_to_dict
+from app.services.costos_service import calcular_totales_mano_obra
 from database.base import get_db
 
 router = APIRouter(prefix="/movimientos", tags=["movimientos"], dependencies=[Depends(require_user)])
@@ -209,10 +210,9 @@ def mano_obra_create(
     db: Session = Depends(get_db),
 ) -> RedirectResponse:
     _ot_or_404(db, ot_id)
-    base = horas * precio_unitario
-    total_neto = base - (base * descuento_pct / Decimal("100")) - bonificacion
-    total_neto = total_neto if total_neto > 0 else Decimal("0")
-    total_con_impuesto = total_neto * Decimal("1.19")
+    total_neto, total_con_impuesto = calcular_totales_mano_obra(
+        horas, precio_unitario, descuento_pct, bonificacion
+    )
 
     item = OTManoObra(
         ot_id=ot_id,

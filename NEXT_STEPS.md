@@ -19,9 +19,9 @@
 
 ## Prioridad 2 — Cobertura y herramientas
 
-- [ ] **Tests:** ampliar `tests/test_smoke.py` (hoy 5 tests, incluido guard de sesión y gate
-      de cambio de password). Falta cubrir cálculos de mano de obra/IVA, sincronización
-      roles↔permisos y expiración de sesión a nivel unitario. — [ID-T04]
+- [x] **Tests:** suite de **19 tests** (unittest): smoke de integración + unitarios de
+      costos/IVA (`test_costos`) + sincronización roles↔permisos (`test_seguridad_sync`) +
+      sesiones (`test_auth_sessions`). — [ID-T04]
 - [ ] **Pytest opcional:** la suite es `unittest`. Si se adopta pytest, declararlo en
       `requirements.txt` (hoy `.gitignore` ya ignora `.pytest_cache/` pero pytest no está instalado). — [ID-T04]
 

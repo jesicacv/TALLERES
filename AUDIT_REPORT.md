@@ -15,8 +15,8 @@ server-side, Pydantic v2 y SQLAlchemy 2.0 sobre `psycopg2`. La estructura por ca
 acciones está implementada de forma consistente** en todas las mutaciones.
 
 **Verificación funcional:** la base PostgreSQL de `.env` conecta, está migrada y sembrada,
-y la suite de integración **`tests/test_smoke.py` pasa los 5 tests** (auth + dashboard +
-flujo operacional con auditoría + guard de sesión + gate de cambio de password).
+y la suite **pasa los 19 tests** (smoke de integración + unitarios de costos/IVA +
+sincronización roles↔permisos + sesiones).
 
 Las diferencias son **deuda acotada**, concentrada en **seguridad de configuración** (CORS
 mal formado, `SECRET_KEY` placeholder, páginas web sin guard de auth) y en **higiene de
@@ -53,7 +53,7 @@ producción hardcodeadas (todo vía `.env`, gitignoreado) y el SQL usa SQLAlchem
 | `services/` | ✅ OK | `auth_service`, `audit_service` |
 | `models/` (ORM) | ✅ OK | uno por entidad + `enums.py` |
 | `schemas/` (Pydantic) | ⚠️ DIFERENCIA | Solo `auth`; el resto entra por `Form(...)`. Aceptable hoy — ver [ID-T06b] |
-| Sin lógica pesada en routers | ⚠️ DIFERENCIA | Cálculo de totales/IVA vive inline en `movimientos.py` — ver [ID-T06b] |
+| Sin lógica pesada en routers | ✅ OK | Cálculo de totales/IVA extraído a `services/costos_service.py` — ver [ID-T06b] |
 
 ### Configuración / Harness
 | Ítem | Estado | Nota |
@@ -64,7 +64,7 @@ producción hardcodeadas (todo vía `.env`, gitignoreado) y el SQL usa SQLAlchem
 | `run_dev.ps1` | ✅ OK | Creado (par de `lanzar_app.bat`) |
 | `.mcp.json` en raíz | ✅ OK | Creado (Postgres MCP, `${DATABASE_URL}`) |
 | `.env` / `.env.example` | ✅ OK | Ambos presentes; `.env` gitignoreado |
-| `tests/` | ✅ OK | `test_smoke.py` (unittest), **3/3 pasan** |
+| `tests/` | ✅ OK | unittest, **19/19 pasan** (smoke, costos, seguridad-sync, sesiones) |
 | `requirements.txt` con versiones fijadas | ✅ OK | Todo con `==` |
 | Sin credenciales de prod hardcodeadas | ✅ OK | Todo vía `.env` |
 | Control de versiones (git) | ✅ OK | Repo git inicializado (rama `main`, commit inicial) — [ID-T07] |
@@ -113,13 +113,19 @@ producción hardcodeadas (todo vía `.env`, gitignoreado) y el SQL usa SQLAlchem
   - Navbar muestra el usuario y botón "Salir".
 - **Verificación:** suite ampliada a **5 tests, todos OK** (incluye `test_protected_pages_require_session` y `test_password_change_gate_redirects`).
 
-### [ID-T04] Cobertura de tests acotada / pytest no declarado
-- **Tipo:** DIFERENCIA
-- **Descripción:** existe `tests/test_smoke.py` (unittest, 3 tests de integración que pasan).
-  No hay tests unitarios de la lógica de negocio (totales de mano de obra, IVA 19%,
-  sincronización roles↔permisos, expiración/invalidez de sesión). `.gitignore` ignora
-  `.pytest_cache/` pero `pytest` no está instalado ni en `requirements.txt`.
-- **Acción sugerida:** sumar casos; si se adopta pytest, declararlo explícitamente.
+### [ID-T04] Cobertura de tests acotada — ✅ CORREGIDA (2026-06-15)
+- **Tipo:** DIFERENCIA — **resuelta**
+- **Descripción original:** solo existía `tests/test_smoke.py`; sin tests de la lógica de
+  negocio (totales de mano de obra/IVA, sincronización roles↔permisos, sesiones).
+- **Fix aplicado:** suite ampliada a **19 tests, todos OK** (unittest):
+  - `tests/test_costos.py` — unitarios **puros** del cálculo de mano de obra/IVA (descuento,
+    bonificación, clamp a 0, IVA 19%, horas fraccionarias). Habilitado por extraer el cálculo
+    a `app/services/costos_service.py` (ver [ID-T06b]).
+  - `tests/test_seguridad_sync.py` — sincronización `roles↔permisos` y `usuarios↔roles`
+    (agrega/quita/vacía, ids inexistentes ignorados).
+  - `tests/test_auth_sessions.py` — login válido, password incorrecta sin sesión, sesión
+    expirada/inactiva rechazada, logout invalida, token malformado.
+- **Nota pytest:** la suite sigue siendo `unittest` (decisión vigente); no se adoptó pytest.
 
 ### [ID-T05] Dos entornos virtuales en disco — ✅ CORREGIDA (2026-06-15)
 - **Tipo:** DIFERENCIA (higiene) — **resuelta**
@@ -140,12 +146,13 @@ producción hardcodeadas (todo vía `.env`, gitignoreado) y el SQL usa SQLAlchem
   venv (sin reverse-deps; `pip check` limpio; tests 5/5 tras la remoción). `httpx` se mantiene
   y quedó anotado como dependencia de test en `requirements.txt`.
 
-### [ID-T06b] Schemas Pydantic mínimos y cálculo de negocio inline
-- **Tipo:** DIFERENCIA (menor, aceptable hoy)
+### [ID-T06b] Schemas Pydantic mínimos y cálculo de negocio inline — 🔧 PARCIAL (2026-06-15)
+- **Tipo:** DIFERENCIA (menor)
 - **Descripción:** casi toda la entrada es `Form(...)` HTML, por eso solo `auth` tiene
-  schemas Pydantic. El cálculo de totales/IVA vive inline en `movimientos.py`.
-- **Acción sugerida:** sin urgencia. Al crecer la lógica o agregar endpoints JSON, mover
-  cálculos a un service y los contratos a `app/schemas/`.
+  schemas Pydantic.
+- **Avance:** el cálculo de totales/IVA de mano de obra se **extrajo** de `movimientos.py` a
+  `app/services/costos_service.py` (`calcular_totales_mano_obra`), con cobertura unitaria
+  propia. Pendiente: consolidar schemas en `app/schemas/` si se agregan endpoints JSON.
 
 ### [ID-T07] Proyecto sin control de versiones — ✅ CORREGIDA (2026-06-15)
 - **Tipo:** DIFERENCIA — **resuelta**
@@ -168,7 +175,7 @@ producción hardcodeadas (todo vía `.env`, gitignoreado) y el SQL usa SQLAlchem
 1. ~~**[ID-T01] Corregir CORS**~~ — ✅ hecho (2026-06-15).
 2. ~~**[ID-T02] Rotar `SECRET_KEY`**~~ — ✅ hecho (2026-06-15), con guard anti-placeholder.
 3. ~~**[ID-T03] Proteger las páginas web**~~ — ✅ hecho (2026-06-15): sesión por cookie + cambio de password forzado.
-4. **[ID-T04] Ampliar tests** sobre la lógica de negocio y sesiones.
+4. ~~**[ID-T04] Ampliar tests**~~ — ✅ hecho (2026-06-15): 19 tests (costos/IVA, roles↔permisos, sesiones).
 5. ~~**[ID-T06] Higiene:** reconciliar dependencias~~ — ✅ hecho (2026-06-15). _([ID-T05] venv consolidado ✅)_
 6. ~~**[ID-T07] `git init`**~~ — ✅ hecho (2026-06-15), commit inicial `836eac1`.
 7. **[ID-T08] Reportes de fase 2** según `PromptModelo`.
