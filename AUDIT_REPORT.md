@@ -9,7 +9,7 @@
 
 **TALLERES** es la app interna de gestión de taller mecánico (FastAPI + HTMX/Tailwind +
 PostgreSQL/SQLAlchemy). El relevamiento confirma que el stack real está **alineado con la
-especificación** (`PromptModelo`): Python 3.13, FastAPI, HTMX + Tailwind por CDN, Jinja2
+especificación** (`PromptModelo`): Python 3.11.2, FastAPI, HTMX + Tailwind por CDN, Jinja2
 server-side, Pydantic v2 y SQLAlchemy 2.0 sobre `psycopg2`. La estructura por capas
 (`models/`, `schemas/`, `routes/`, `services/`) está bien ordenada y la **auditoría de
 acciones está implementada de forma consistente** en todas las mutaciones.
@@ -39,7 +39,7 @@ producción hardcodeadas (todo vía `.env`, gitignoreado) y el SQL usa SQLAlchem
 ### Stack (vs. PromptModelo §2 y TECH_STACK.md)
 | Ítem | Estado | Nota |
 |---|---|---|
-| Python 3.13 | ✅ OK | venv en `venv/` |
+| Python 3.11+ | ✅ OK | 3.11.2, venv en `venv/` (único venv tras [ID-T05]) |
 | FastAPI como framework | ✅ OK | `app/main.py`, 6 routers |
 | HTMX + Tailwind en frontend | ✅ OK | CDN; HTMX 1.9.12; sin Alpine ni JS a mano |
 | PostgreSQL + SQLAlchemy 2.0 | ✅ OK | `psycopg2`, `database/base.py` |
@@ -121,11 +121,16 @@ producción hardcodeadas (todo vía `.env`, gitignoreado) y el SQL usa SQLAlchem
   `.pytest_cache/` pero `pytest` no está instalado ni en `requirements.txt`.
 - **Acción sugerida:** sumar casos; si se adopta pytest, declararlo explícitamente.
 
-### [ID-T05] Dos entornos virtuales en disco
-- **Tipo:** DIFERENCIA (higiene)
-- **Descripción:** coexisten `venv/` (el que usan `lanzar_app.bat`/`run_dev.ps1`) y `.venv/`.
-  `.gitignore` solo ignora `venv/`, no `.venv/`.
-- **Acción sugerida:** consolidar a uno; agregar `.venv/` a `.gitignore` o eliminarlo.
+### [ID-T05] Dos entornos virtuales en disco — ✅ CORREGIDA (2026-06-15)
+- **Tipo:** DIFERENCIA (higiene) — **resuelta**
+- **Descripción original:** coexistían `venv/` (Python 3.11.2, con todas las deps, usado por
+  lanzadores/`.vscode`/tests) y `.venv/` (Python 3.13.2, **vacío** — sin `fastapi` ni el
+  resto del stack, no referenciado por nada). `.gitignore` solo ignoraba `venv/`.
+- **Fix aplicado:** se eliminó `.venv/` del disco (era un venv abandonado e incompleto) y se
+  agregó `.venv/` al `.gitignore`. Queda un único entorno: `venv/`.
+- **Corrección de documentación:** la versión real de Python es **3.11.2** (los docs decían
+  3.13 por un supuesto no verificado en la auditoría inicial); corregido en `CLAUDE.md`,
+  `TECH_STACK.md` y este reporte.
 
 ### [ID-T06] Dependencias declaradas sin uso directo
 - **Tipo:** DIFERENCIA (trazabilidad stack↔deps)
@@ -163,7 +168,7 @@ producción hardcodeadas (todo vía `.env`, gitignoreado) y el SQL usa SQLAlchem
 2. ~~**[ID-T02] Rotar `SECRET_KEY`**~~ — ✅ hecho (2026-06-15), con guard anti-placeholder.
 3. ~~**[ID-T03] Proteger las páginas web**~~ — ✅ hecho (2026-06-15): sesión por cookie + cambio de password forzado.
 4. **[ID-T04] Ampliar tests** sobre la lógica de negocio y sesiones.
-5. **[ID-T05/T06] Higiene:** consolidar venv, reconciliar dependencias (con OK del usuario).
+5. **[ID-T06] Higiene:** reconciliar dependencias (con OK del usuario). _([ID-T05] venv consolidado ✅)_
 6. ~~**[ID-T07] `git init`**~~ — ✅ hecho (2026-06-15), commit inicial `836eac1`.
 7. **[ID-T08] Reportes de fase 2** según `PromptModelo`.
 

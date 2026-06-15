@@ -8,7 +8,7 @@
 
 | Tecnología | Versión (pin) | Rol en el proyecto |
 |---|---|---|
-| Python | 3.13 | Lenguaje (venv en `venv/`) |
+| Python | 3.11.2 | Lenguaje (venv en `venv/`) |
 | FastAPI | 0.104.1 | Framework web / API (`app/main.py`, 6 routers) |
 | uvicorn[standard] | 0.24.0 | Servidor ASGI (dev y prod) |
 | SQLAlchemy | 2.0.23 | ORM, sesión `get_db()` (`database/base.py`) |

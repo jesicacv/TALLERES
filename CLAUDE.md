@@ -14,7 +14,7 @@ supervisores y administradores.
 
 ## 2. Stack real (ver `TECH_STACK.md` para el detalle libs↔uso)
 
-- **Lenguaje:** Python 3.13 (venv en `venv/`).
+- **Lenguaje:** Python 3.11.2 (venv en `venv/`).
 - **Backend:** FastAPI (server-side rendering, **no** SPA).
 - **Frontend:** Jinja2 + **HTMX 1.9.12** (CDN) + **Tailwind CSS** (CDN `cdn.tailwindcss.com`). Sin JS adicional, sin Alpine, sin build step.
 - **DB:** PostgreSQL vía **SQLAlchemy 2.0** (driver `psycopg2`).

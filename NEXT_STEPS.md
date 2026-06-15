@@ -29,8 +29,8 @@
 
 - [ ] **Reconciliar dependencias:** decidir sobre `aiofiles` y `email-validator` (sin uso
       directo) — usar o remover. Marcar `httpx` como dep de test. — [ID-T06]
-- [~] **Dos venvs:** `.venv/` ya está en `.gitignore` (no se versiona); falta **eliminar del disco**
-      el venv sobrante para dejar uno solo. — [ID-T05]
+- [x] **Dos venvs:** eliminado `.venv/` del disco (estaba vacío, Python 3.13.2 sin deps) y
+      agregado a `.gitignore`. Queda solo `venv/` (Python 3.11.2). — [ID-T05]
 - [x] **Control de versiones:** repo git inicializado (rama `main`, commit inicial `836eac1`),
       con `.env` y venvs excluidos. — [ID-T07]
 
