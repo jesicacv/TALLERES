@@ -36,8 +36,8 @@
 
 ## Publicación y despliegue (política del harness — `CLAUDE.md §9`)
 
-- [ ] **Remoto:** publicar el repo local en GitHub y/o GitLab (`git remote add` + `git push`
-      de `main`). Requiere `gh`/credenciales o un remoto creado. — [CLAUDE.md §9.1]
+- [x] **Remoto:** publicado en GitHub → `https://github.com/jesicacv/TALLERES` (rama `main`,
+      8 commits). Falta opcionalmente espejarlo en GitLab. — [CLAUDE.md §9.1]
 - [ ] **Despliegue SSH (definir al publicar):** al subir el repo, si el despliegue no está
       definido, agregar **todo lo necesario**: clave SSH, IP del servidor, host, usuario,
       ruta de destino y método de sync (`git pull`/`rsync`/hook). — [CLAUDE.md §9.2]
