@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ app_name }}{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tallerGreen: "#1B6B5A",
+                        tallerBlue: "#1B3F7A",
+                    },
+                },
+            },
+        };
+    </script>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body class="bg-slate-100 text-slate-900">
+    <input type="checkbox" id="menu-toggle" class="menu-toggle" aria-hidden="true">
+
+    <header class="lg:hidden sticky top-0 z-40 bg-gradient-to-r from-tallerGreen to-tallerBlue text-white shadow">
+        <div class="px-4 py-3 flex items-center justify-between">
+            <div>
+                <h1 class="text-lg font-semibold tracking-wide">{{ app_name }}</h1>
+                <p class="text-xs text-slate-100/90">Version {{ app_version }}</p>
+            </div>
+            <label for="menu-toggle" class="hamburger-btn" aria-label="Abrir menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </label>
+        </div>
+    </header>
+
+    <div class="app-shell min-h-screen lg:grid lg:grid-cols-[260px_1fr]">
+        {% include "components/sidebar.html" %}
+
+        <div class="main-column min-w-0">
+            {% include "components/navbar.html" %}
+
+            <main class="p-4 md:p-6 lg:p-8">
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+</body>
+</html>

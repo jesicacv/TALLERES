@@ -1,0 +1,17 @@
+{% extends "base/layout.html" %}
+{% block title %}Mano de Obra OT | {{ app_name }}{% endblock %}
+{% block content %}
+<section class="space-y-6">
+    <div class="flex items-center justify-between"><div><h3 class="text-2xl font-semibold">Mano de Obra - {{ ot.numero_ot }}</h3><p class="text-slate-600">Registro de trabajos por tecnico.</p></div><a href="/movimientos/ordenes-trabajo" class="btn-secondary">Volver a OT</a></div>
+    <form method="post" action="/movimientos/ordenes-trabajo/{{ ot.id }}/mano-obra/create" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 bg-white border border-slate-200 rounded-2xl p-4">
+        <select required name="tecnico_id" class="field">{% for t in tecnicos %}<option value="{{ t.id }}">{{ t.codigo }} - {{ t.nombre }}</option>{% endfor %}</select>
+        <input required type="number" step="0.01" name="horas" placeholder="Horas" class="field">
+        <input required type="number" step="0.01" name="precio_unitario" placeholder="Precio unitario" class="field">
+        <input type="number" step="0.01" name="descuento_pct" placeholder="Descuento %" class="field">
+        <input type="number" step="0.01" name="bonificacion" placeholder="Bonificacion" class="field">
+        <input required name="descripcion_trabajo" placeholder="Descripcion del trabajo" class="field xl:col-span-3">
+        <div class="md:col-span-2 xl:col-span-4 flex justify-end"><button class="btn-primary" type="submit">Agregar mano de obra</button></div>
+    </form>
+    <div class="overflow-x-auto bg-white rounded-2xl border border-slate-200"><table class="w-full text-sm"><thead class="bg-slate-100 text-left"><tr><th class="px-3 py-2">Tecnico</th><th class="px-3 py-2">Trabajo</th><th class="px-3 py-2">Horas</th><th class="px-3 py-2">Neto</th><th class="px-3 py-2">Total</th><th class="px-3 py-2">Acciones</th></tr></thead><tbody>{% for item in items %}<tr class="border-t border-slate-100"><td class="px-3 py-2">{{ item.tecnico.nombre }}</td><td class="px-3 py-2">{{ item.descripcion_trabajo }}</td><td class="px-3 py-2">{{ item.horas }}</td><td class="px-3 py-2">{{ item.total_neto }}</td><td class="px-3 py-2">{{ item.total_con_impuesto }}</td><td class="px-3 py-2"><form method="post" action="/movimientos/mano-obra/{{ item.id }}/delete" onsubmit="return confirm('Eliminar item?');"><button class="btn-danger" type="submit">Eliminar</button></form></td></tr>{% endfor %}</tbody></table></div>
+</section>
+{% endblock %}

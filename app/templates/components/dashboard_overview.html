@@ -1,0 +1,27 @@
+<div class="space-y-5">
+    {% include "components/kpi_grid.html" %}
+
+    <div class="grid grid-cols-1 xl:grid-cols-[1.2fr_0.8fr] gap-5">
+        {% include "components/dashboard_recent_orders.html" %}
+        {% include "components/dashboard_status_summary.html" %}
+    </div>
+
+    <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <article class="rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
+            <p class="text-sm text-slate-500">Clientes</p>
+            <p class="mt-2 text-2xl font-semibold text-slate-900">{{ master_counts.clientes }}</p>
+        </article>
+        <article class="rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
+            <p class="text-sm text-slate-500">Vehiculos</p>
+            <p class="mt-2 text-2xl font-semibold text-slate-900">{{ master_counts.vehiculos }}</p>
+        </article>
+        <article class="rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
+            <p class="text-sm text-slate-500">Tecnicos activos</p>
+            <p class="mt-2 text-2xl font-semibold text-slate-900">{{ master_counts.tecnicos }}</p>
+        </article>
+        <article class="rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
+            <p class="text-sm text-slate-500">Repuestos</p>
+            <p class="mt-2 text-2xl font-semibold text-slate-900">{{ master_counts.repuestos }}</p>
+        </article>
+    </section>
+</div>

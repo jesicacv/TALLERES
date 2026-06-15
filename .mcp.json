@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "postgres_taller": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "${DATABASE_URL}"
+      ]
+    }
+  }
+}

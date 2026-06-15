@@ -1,0 +1,20 @@
+<section class="rounded-2xl bg-white border border-slate-200 shadow-sm p-4">
+    <div class="mb-4">
+        <h4 class="text-lg font-semibold text-slate-900">Distribucion por Estado</h4>
+        <p class="text-sm text-slate-500">Lectura visual del estado actual de las OT.</p>
+    </div>
+
+    <div class="space-y-4">
+        {% for item in status_summary %}
+        <div>
+            <div class="flex items-center justify-between text-sm mb-1">
+                <span class="font-medium text-slate-700">{{ item.estado }}</span>
+                <span class="text-slate-500">{{ item.cantidad }} ({{ item.porcentaje }}%)</span>
+            </div>
+            <div class="h-2 rounded-full bg-slate-100 overflow-hidden">
+                <div class="h-full rounded-full bg-gradient-to-r from-tallerGreen to-tallerBlue" style="width: {{ item.porcentaje }}%"></div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>

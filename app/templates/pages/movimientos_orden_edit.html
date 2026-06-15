@@ -1,0 +1,19 @@
+{% extends "base/layout.html" %}
+{% block title %}Editar OT | {{ app_name }}{% endblock %}
+{% block content %}
+<section class="space-y-4 max-w-5xl">
+    <div class="flex items-center justify-between"><h3 class="text-2xl font-semibold">Editar {{ ot.numero_ot }}</h3><a href="/movimientos/ordenes-trabajo" class="btn-secondary">Volver</a></div>
+    <form method="post" action="/movimientos/ordenes-trabajo/{{ ot.id }}/edit" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 bg-white border border-slate-200 rounded-2xl p-4">
+        <select required name="patente" class="field">{% for v in vehiculos %}<option value="{{ v.patente }}" {% if v.patente == ot.patente %}selected{% endif %}>{{ v.patente }} - {{ v.marca }} {{ v.modelo }}</option>{% endfor %}</select>
+        <select name="recepcionista_id" class="field"><option value="">Recepcionista</option>{% for u in usuarios %}<option value="{{ u.id }}" {% if u.id == ot.recepcionista_id %}selected{% endif %}>{{ u.nombre_completo }}</option>{% endfor %}</select>
+        <select required name="estado" class="field">{% for e in estados_ot %}<option value="{{ e }}" {% if e == ot.estado.value %}selected{% endif %}>{{ e }}</option>{% endfor %}</select>
+        <input required type="date" name="fecha_ingreso" value="{{ ot.fecha_ingreso }}" class="field">
+        <input type="date" name="fecha_prometida" value="{{ ot.fecha_prometida or '' }}" class="field">
+        <input type="date" name="fecha_termino" value="{{ ot.fecha_termino or '' }}" class="field">
+        <input type="number" name="kms_ingreso" value="{{ ot.kms_ingreso or '' }}" class="field">
+        <input name="forma_pago" value="{{ ot.forma_pago or '' }}" class="field">
+        <input name="glosa_general" value="{{ ot.glosa_general or '' }}" class="field xl:col-span-3">
+        <div class="md:col-span-2 xl:col-span-4 flex justify-end"><button class="btn-primary" type="submit">Guardar cambios</button></div>
+    </form>
+</section>
+{% endblock %}

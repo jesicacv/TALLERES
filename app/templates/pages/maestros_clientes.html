@@ -1,0 +1,57 @@
+{% extends "base/layout.html" %}
+
+{% block title %}Clientes | {{ app_name }}{% endblock %}
+
+{% block content %}
+<section class="space-y-6">
+    <div>
+        <h3 class="text-2xl font-semibold">Clientes</h3>
+        <p class="text-slate-600">ABM de clientes con RUT como clave principal.</p>
+    </div>
+
+    <form method="post" action="/maestros/clientes/create" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 bg-white border border-slate-200 rounded-2xl p-4">
+        <input required name="rut" placeholder="RUT" class="field">
+        <input required name="nombre" placeholder="Nombre" class="field">
+        <input name="email" placeholder="Email" class="field">
+        <input name="celular" placeholder="Celular" class="field">
+        <input name="direccion" placeholder="Direccion" class="field">
+        <input name="ciudad" placeholder="Ciudad" class="field">
+        <input name="comuna" placeholder="Comuna" class="field">
+        <input name="forma_pago_default" placeholder="Forma pago" class="field">
+        <div class="md:col-span-2 xl:col-span-4 flex justify-end">
+            <button class="btn-primary" type="submit">Crear cliente</button>
+        </div>
+    </form>
+
+    <form method="get" class="flex gap-2">
+        <input name="q" value="{{ q }}" placeholder="Buscar por RUT o nombre" class="field max-w-md">
+        <button class="btn-secondary" type="submit">Buscar</button>
+    </form>
+
+    <div class="overflow-x-auto bg-white rounded-2xl border border-slate-200">
+        <table class="w-full text-sm">
+            <thead class="bg-slate-100 text-left">
+                <tr>
+                    <th class="px-3 py-2">RUT</th><th class="px-3 py-2">Nombre</th><th class="px-3 py-2">Email</th><th class="px-3 py-2">Celular</th><th class="px-3 py-2">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in clientes %}
+                <tr class="border-t border-slate-100">
+                    <td class="px-3 py-2">{{ c.rut }}</td>
+                    <td class="px-3 py-2">{{ c.nombre }}</td>
+                    <td class="px-3 py-2">{{ c.email or '-' }}</td>
+                    <td class="px-3 py-2">{{ c.celular or '-' }}</td>
+                    <td class="px-3 py-2 flex gap-2">
+                        <a href="/maestros/clientes/{{ c.rut }}/edit" class="btn-secondary">Editar</a>
+                        <form method="post" action="/maestros/clientes/{{ c.rut }}/delete" onsubmit="return confirm('Eliminar cliente?');">
+                            <button class="btn-danger" type="submit">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

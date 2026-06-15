@@ -1,0 +1,55 @@
+{% extends "base/layout.html" %}
+{% block title %}Vehiculos | {{ app_name }}{% endblock %}
+{% block content %}
+<section class="space-y-6">
+    <div>
+        <h3 class="text-2xl font-semibold">Vehiculos</h3>
+        <p class="text-slate-600">ABM de vehiculos con patente como clave principal.</p>
+    </div>
+
+    <form method="post" action="/maestros/vehiculos/create" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 bg-white border border-slate-200 rounded-2xl p-4">
+        <input required name="patente" placeholder="Patente" class="field">
+        <select required name="cliente_rut" class="field">
+            <option value="">Cliente (RUT)</option>
+            {% for c in clientes %}<option value="{{ c.rut }}">{{ c.rut }} - {{ c.nombre }}</option>{% endfor %}
+        </select>
+        <input required name="marca" placeholder="Marca" class="field">
+        <input required name="modelo" placeholder="Modelo" class="field">
+        <input name="sub_modelo" placeholder="Sub modelo" class="field">
+        <select required name="tipo" class="field">
+            {% for t in tipos_vehiculo %}<option value="{{ t }}">{{ t }}</option>{% endfor %}
+        </select>
+        <input type="number" name="anio" placeholder="Anio" class="field">
+        <input name="color" placeholder="Color" class="field">
+        <input name="chasis_vin" placeholder="Chasis VIN" class="field xl:col-span-2">
+        <div class="md:col-span-2 xl:col-span-4 flex justify-end">
+            <button class="btn-primary" type="submit">Crear vehiculo</button>
+        </div>
+    </form>
+
+    <form method="get" class="flex gap-2">
+        <input name="q" value="{{ q }}" placeholder="Buscar por patente, marca, modelo o cliente" class="field max-w-md">
+        <button class="btn-secondary" type="submit">Buscar</button>
+    </form>
+
+    <div class="overflow-x-auto bg-white rounded-2xl border border-slate-200">
+        <table class="w-full text-sm">
+            <thead class="bg-slate-100 text-left"><tr><th class="px-3 py-2">Patente</th><th class="px-3 py-2">Cliente</th><th class="px-3 py-2">Marca/Modelo</th><th class="px-3 py-2">Tipo</th><th class="px-3 py-2">Acciones</th></tr></thead>
+            <tbody>
+            {% for v in vehiculos %}
+                <tr class="border-t border-slate-100">
+                    <td class="px-3 py-2">{{ v.patente }}</td>
+                    <td class="px-3 py-2">{{ v.cliente_rut }}</td>
+                    <td class="px-3 py-2">{{ v.marca }} {{ v.modelo }}</td>
+                    <td class="px-3 py-2">{{ v.tipo.value }}</td>
+                    <td class="px-3 py-2 flex gap-2">
+                        <a href="/maestros/vehiculos/{{ v.patente }}/edit" class="btn-secondary">Editar</a>
+                        <form method="post" action="/maestros/vehiculos/{{ v.patente }}/delete" onsubmit="return confirm('Eliminar vehiculo?');"><button class="btn-danger" type="submit">Eliminar</button></form>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

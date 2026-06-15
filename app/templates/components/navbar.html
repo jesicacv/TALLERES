@@ -1,0 +1,16 @@
+<header class="hidden lg:flex h-16 px-8 items-center justify-between border-b border-slate-200 bg-white/90 backdrop-blur">
+    <div>
+        <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Panel Operativo</p>
+        <h2 class="text-lg font-semibold text-slate-800">Gestion de Taller</h2>
+    </div>
+
+    <div class="flex items-center gap-3">
+        {% if request.state.user %}
+        <span class="text-sm text-slate-600">{{ request.state.user.nombre_completo }}</span>
+        {% endif %}
+        <a href="/system/health" class="px-3 py-2 rounded-lg bg-tallerBlue text-white text-sm hover:brightness-110 transition">System Health</a>
+        <form method="post" action="/logout" class="inline">
+            <button type="submit" class="px-3 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-100 transition">Salir</button>
+        </form>
+    </div>
+</header>

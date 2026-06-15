@@ -1,0 +1,44 @@
+{% extends "base/layout.html" %}
+{% block title %}Roles | {{ app_name }}{% endblock %}
+{% block content %}
+<section class="space-y-6">
+    <div><h3 class="text-2xl font-semibold">Roles y Permisos</h3><p class="text-slate-600">Gestion de roles y asignacion de permisos.</p></div>
+
+    <form method="post" action="/seguridad/roles/create" class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-white border border-slate-200 rounded-2xl p-4">
+        <input required name="nombre" placeholder="Nombre de rol" class="field">
+        <input name="descripcion" placeholder="Descripcion" class="field">
+        <div class="md:col-span-2">
+            <p class="text-sm font-medium text-slate-700 mb-2">Permisos</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2 max-h-52 overflow-y-auto pr-2">
+                {% for p in permisos %}
+                <label class="inline-flex items-center gap-2 text-sm"><input type="checkbox" name="permiso_ids" value="{{ p.id }}">{{ p.modulo }} / {{ p.codigo }}</label>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="md:col-span-2 flex justify-end"><button class="btn-primary" type="submit">Crear rol</button></div>
+    </form>
+
+    <form method="get" class="flex gap-2"><input name="q" value="{{ q }}" placeholder="Buscar rol" class="field max-w-md"><button class="btn-secondary">Buscar</button></form>
+
+    <div class="overflow-x-auto bg-white rounded-2xl border border-slate-200">
+        <table class="w-full text-sm">
+            <thead class="bg-slate-100 text-left"><tr><th class="px-3 py-2">ID</th><th class="px-3 py-2">Nombre</th><th class="px-3 py-2">Descripcion</th><th class="px-3 py-2">Acciones</th></tr></thead>
+            <tbody>
+                {% for r in roles %}
+                <tr class="border-t border-slate-100">
+                    <td class="px-3 py-2">{{ r.id }}</td>
+                    <td class="px-3 py-2">{{ r.nombre }}</td>
+                    <td class="px-3 py-2">{{ r.descripcion or '-' }}</td>
+                    <td class="px-3 py-2 flex gap-2">
+                        <a href="/seguridad/roles/{{ r.id }}/edit" class="btn-secondary">Editar</a>
+                        <form method="post" action="/seguridad/roles/{{ r.id }}/delete" onsubmit="return confirm('Eliminar rol?');"><button class="btn-danger" type="submit">Eliminar</button></form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <a href="/seguridad/permisos" class="btn-secondary">Ir a Permisos</a>
+</section>
+{% endblock %}

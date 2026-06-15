@@ -1,0 +1,38 @@
+{% extends "base/layout.html" %}
+{% block title %}Permisos | {{ app_name }}{% endblock %}
+{% block content %}
+<section class="space-y-6">
+    <div><h3 class="text-2xl font-semibold">Permisos</h3><p class="text-slate-600">CRUD de permisos por modulo.</p></div>
+
+    <form method="post" action="/seguridad/permisos/create" class="grid grid-cols-1 md:grid-cols-3 gap-3 bg-white border border-slate-200 rounded-2xl p-4">
+        <input required name="codigo" placeholder="Codigo (ej: clientes.ver)" class="field">
+        <input required name="modulo" placeholder="Modulo" class="field">
+        <input name="descripcion" placeholder="Descripcion" class="field md:col-span-3">
+        <div class="md:col-span-3 flex justify-end"><button class="btn-primary" type="submit">Crear permiso</button></div>
+    </form>
+
+    <form method="get" class="flex gap-2"><input name="q" value="{{ q }}" placeholder="Buscar permiso" class="field max-w-md"><button class="btn-secondary">Buscar</button></form>
+
+    <div class="overflow-x-auto bg-white rounded-2xl border border-slate-200">
+        <table class="w-full text-sm">
+            <thead class="bg-slate-100 text-left"><tr><th class="px-3 py-2">ID</th><th class="px-3 py-2">Codigo</th><th class="px-3 py-2">Modulo</th><th class="px-3 py-2">Descripcion</th><th class="px-3 py-2">Acciones</th></tr></thead>
+            <tbody>
+                {% for p in permisos %}
+                <tr class="border-t border-slate-100">
+                    <td class="px-3 py-2">{{ p.id }}</td>
+                    <td class="px-3 py-2">{{ p.codigo }}</td>
+                    <td class="px-3 py-2">{{ p.modulo }}</td>
+                    <td class="px-3 py-2">{{ p.descripcion or '-' }}</td>
+                    <td class="px-3 py-2 flex gap-2">
+                        <a href="/seguridad/permisos/{{ p.id }}/edit" class="btn-secondary">Editar</a>
+                        <form method="post" action="/seguridad/permisos/{{ p.id }}/delete" onsubmit="return confirm('Eliminar permiso?');"><button class="btn-danger" type="submit">Eliminar</button></form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <a href="/seguridad/roles" class="btn-secondary">Volver a Roles</a>
+</section>
+{% endblock %}

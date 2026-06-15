@@ -1,0 +1,57 @@
+{% extends "base/layout.html" %}
+{% block title %}Ordenes de Trabajo | {{ app_name }}{% endblock %}
+{% block content %}
+<section class="space-y-6">
+    <div><h3 class="text-2xl font-semibold">Ordenes de Trabajo</h3><p class="text-slate-600">Centro operativo del taller.</p></div>
+
+    <form method="post" action="/movimientos/ordenes-trabajo/create" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 bg-white border border-slate-200 rounded-2xl p-4">
+        <input required name="numero_ot" value="{{ numero_ot_sugerido }}" class="field">
+        <select required name="patente" class="field">
+            <option value="">Vehiculo</option>
+            {% for v in vehiculos %}<option value="{{ v.patente }}">{{ v.patente }} - {{ v.marca }} {{ v.modelo }}</option>{% endfor %}
+        </select>
+        <select name="recepcionista_id" class="field">
+            <option value="">Recepcionista</option>
+            {% for u in usuarios %}<option value="{{ u.id }}">{{ u.nombre_completo }}</option>{% endfor %}
+        </select>
+        <select required name="estado" class="field">
+            {% for e in estados_ot %}<option value="{{ e }}">{{ e }}</option>{% endfor %}
+        </select>
+        <input required type="date" name="fecha_ingreso" class="field">
+        <input type="date" name="fecha_prometida" class="field">
+        <input type="date" name="fecha_termino" class="field">
+        <input type="number" name="kms_ingreso" placeholder="KMs ingreso" class="field">
+        <input name="forma_pago" placeholder="Forma pago" class="field">
+        <input name="glosa_general" placeholder="Glosa general" class="field xl:col-span-3">
+        <div class="md:col-span-2 xl:col-span-4 flex justify-end"><button class="btn-primary" type="submit">Crear OT</button></div>
+    </form>
+
+    <form method="get" class="flex gap-2"><input name="q" value="{{ q }}" placeholder="Buscar OT, patente, cliente o glosa" class="field max-w-md"><button class="btn-secondary">Buscar</button></form>
+
+    <div class="overflow-x-auto bg-white rounded-2xl border border-slate-200">
+        <table class="w-full text-sm">
+            <thead class="bg-slate-100 text-left"><tr><th class="px-3 py-2">OT</th><th class="px-3 py-2">Patente</th><th class="px-3 py-2">Cliente</th><th class="px-3 py-2">Estado</th><th class="px-3 py-2">Ingreso</th><th class="px-3 py-2">Acciones</th></tr></thead>
+            <tbody>
+                {% for ot in ordenes %}
+                <tr class="border-t border-slate-100 align-top">
+                    <td class="px-3 py-2">{{ ot.numero_ot }}</td>
+                    <td class="px-3 py-2">{{ ot.patente }}</td>
+                    <td class="px-3 py-2">{{ ot.cliente_rut }}</td>
+                    <td class="px-3 py-2">{{ ot.estado.value }}</td>
+                    <td class="px-3 py-2">{{ ot.fecha_ingreso }}</td>
+                    <td class="px-3 py-2 space-y-2">
+                        <div class="flex flex-wrap gap-2">
+                            <a href="/movimientos/ordenes-trabajo/{{ ot.id }}/edit" class="btn-secondary">Editar</a>
+                            <a href="/movimientos/ordenes-trabajo/{{ ot.id }}/mano-obra" class="btn-secondary">Mano Obra</a>
+                            <a href="/movimientos/ordenes-trabajo/{{ ot.id }}/repuestos" class="btn-secondary">Repuestos</a>
+                            <a href="/movimientos/ordenes-trabajo/{{ ot.id }}/checklist" class="btn-secondary">Checklist</a>
+                            <form method="post" action="/movimientos/ordenes-trabajo/{{ ot.id }}/delete" onsubmit="return confirm('Eliminar OT?');"><button class="btn-danger" type="submit">Eliminar</button></form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
