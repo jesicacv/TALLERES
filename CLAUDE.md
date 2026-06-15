@@ -5,6 +5,14 @@
 > Especificación funcional canónica: [`PromptModelo_TallerMecanico.md`](PromptModelo_TallerMecanico.md).
 > Estado del harness y deuda técnica: [`AUDIT_REPORT.md`](AUDIT_REPORT.md) · [`NEXT_STEPS.md`](NEXT_STEPS.md).
 
+## 0. Idioma — TODO en español
+
+**Toda la comunicación y el contenido de este proyecto va en español.** Esto incluye: las
+respuestas al usuario, los mensajes de commit, los comentarios y docstrings del código, la
+documentación (`.md`), los textos de UI y los mensajes de error/validación. Identificadores
+de código (nombres de variables, funciones, rutas) pueden quedar en inglés si así está la
+convención existente, pero todo lo legible por humanos se redacta en español.
+
 ## 1. Qué es esto
 
 App web interna para administrar un taller mecánico: clientes y vehículos, órdenes de
