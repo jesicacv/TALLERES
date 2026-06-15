@@ -67,7 +67,7 @@ producción hardcodeadas (todo vía `.env`, gitignoreado) y el SQL usa SQLAlchem
 | `tests/` | ✅ OK | `test_smoke.py` (unittest), **3/3 pasan** |
 | `requirements.txt` con versiones fijadas | ✅ OK | Todo con `==` |
 | Sin credenciales de prod hardcodeadas | ✅ OK | Todo vía `.env` |
-| Control de versiones (git) | ⚠️ DIFERENCIA | No es repo git — ver [ID-T07] |
+| Control de versiones (git) | ✅ OK | Repo git inicializado (rama `main`, commit inicial) — [ID-T07] |
 
 ---
 
@@ -141,11 +141,14 @@ producción hardcodeadas (todo vía `.env`, gitignoreado) y el SQL usa SQLAlchem
 - **Acción sugerida:** sin urgencia. Al crecer la lógica o agregar endpoints JSON, mover
   cálculos a un service y los contratos a `app/schemas/`.
 
-### [ID-T07] Proyecto sin control de versiones
-- **Tipo:** DIFERENCIA
-- **Descripción:** el directorio no es un repositorio git (hay `.gitignore`, pero no `.git`).
-  Sin historial ni base para `/code-review`.
-- **Acción sugerida:** evaluar `git init` + primer commit del estado actual (con el harness recién agregado).
+### [ID-T07] Proyecto sin control de versiones — ✅ CORREGIDA (2026-06-15)
+- **Tipo:** DIFERENCIA — **resuelta**
+- **Descripción original:** el directorio no era un repositorio git (había `.gitignore`, pero
+  no `.git`). Sin historial ni base para `/code-review`.
+- **Fix aplicado:** `git init -b main` + commit inicial (`836eac1`) con 88 archivos
+  versionados. Se reforzó `.gitignore` (`.venv/`, `logs/`, `*.log`); verificado que `.env`
+  y ambos venvs quedan fuera del control de versiones. Identidad local del repo:
+  `efrancalancia <efrancalancia@outlook.cl>` (ajustable con `git config user.name`).
 
 ### [ID-T08] Reportes (fase 2) pendientes
 - **Tipo:** DIFERENCIA (alcance planificado)
@@ -161,7 +164,7 @@ producción hardcodeadas (todo vía `.env`, gitignoreado) y el SQL usa SQLAlchem
 3. ~~**[ID-T03] Proteger las páginas web**~~ — ✅ hecho (2026-06-15): sesión por cookie + cambio de password forzado.
 4. **[ID-T04] Ampliar tests** sobre la lógica de negocio y sesiones.
 5. **[ID-T05/T06] Higiene:** consolidar venv, reconciliar dependencias (con OK del usuario).
-6. **[ID-T07] `git init`** para versionar el proyecto y el harness.
+6. ~~**[ID-T07] `git init`**~~ — ✅ hecho (2026-06-15), commit inicial `836eac1`.
 7. **[ID-T08] Reportes de fase 2** según `PromptModelo`.
 
 > El sistema **funciona y los smoke tests pasan**. La prioridad real es seguridad de

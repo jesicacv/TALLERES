@@ -29,9 +29,10 @@
 
 - [ ] **Reconciliar dependencias:** decidir sobre `aiofiles` y `email-validator` (sin uso
       directo) — usar o remover. Marcar `httpx` como dep de test. — [ID-T06]
-- [ ] **Dos venvs:** consolidar a uno. Agregar `.venv/` a `.gitignore` o eliminarlo. — [ID-T05]
-- [ ] **Control de versiones:** el proyecto no es un repo git. Evaluar `git init` para
-      versionar el harness y habilitar `/code-review`. — [ID-T07]
+- [~] **Dos venvs:** `.venv/` ya está en `.gitignore` (no se versiona); falta **eliminar del disco**
+      el venv sobrante para dejar uno solo. — [ID-T05]
+- [x] **Control de versiones:** repo git inicializado (rama `main`, commit inicial `836eac1`),
+      con `.env` y venvs excluidos. — [ID-T07]
 
 ## Fase 2 — Funcionalidad (de `PromptModelo`)
 
