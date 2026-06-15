@@ -27,8 +27,8 @@
 
 ## Prioridad 3 — Higiene del repo (requiere OK para tocar requirements.txt)
 
-- [ ] **Reconciliar dependencias:** decidir sobre `aiofiles` y `email-validator` (sin uso
-      directo) — usar o remover. Marcar `httpx` como dep de test. — [ID-T06]
+- [x] **Reconciliar dependencias:** removidos `aiofiles` y `email-validator` (sin uso);
+      `httpx` anotado como dep de test. `pip check` limpio, tests 5/5. — [ID-T06]
 - [x] **Dos venvs:** eliminado `.venv/` del disco (estaba vacío, Python 3.13.2 sin deps) y
       agregado a `.gitignore`. Queda solo `venv/` (Python 3.11.2). — [ID-T05]
 - [x] **Control de versiones:** repo git inicializado (rama `main`, commit inicial `836eac1`),

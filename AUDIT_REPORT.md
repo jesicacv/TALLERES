@@ -132,12 +132,13 @@ producción hardcodeadas (todo vía `.env`, gitignoreado) y el SQL usa SQLAlchem
   3.13 por un supuesto no verificado en la auditoría inicial); corregido en `CLAUDE.md`,
   `TECH_STACK.md` y este reporte.
 
-### [ID-T06] Dependencias declaradas sin uso directo
-- **Tipo:** DIFERENCIA (trazabilidad stack↔deps)
-- **Descripción:** `aiofiles` y `email-validator` no se usan en `app/` (grep sin hits).
-  `httpx` solo lo usa `TestClient` (legítimo como dep de test).
-- **Acción sugerida:** decidir por cada una (usar/remover/marcar como test). **Requiere OK
-  del usuario antes de tocar `requirements.txt`.**
+### [ID-T06] Dependencias declaradas sin uso directo — ✅ CORREGIDA (2026-06-15)
+- **Tipo:** DIFERENCIA (trazabilidad stack↔deps) — **resuelta** (con OK del usuario, R5)
+- **Descripción original:** `aiofiles` y `email-validator` no se usaban (grep sin hits en
+  todo el repo); `httpx` solo lo usa `TestClient`.
+- **Fix aplicado:** se removieron `aiofiles` y `email-validator` de `requirements.txt` y del
+  venv (sin reverse-deps; `pip check` limpio; tests 5/5 tras la remoción). `httpx` se mantiene
+  y quedó anotado como dependencia de test en `requirements.txt`.
 
 ### [ID-T06b] Schemas Pydantic mínimos y cálculo de negocio inline
 - **Tipo:** DIFERENCIA (menor, aceptable hoy)
@@ -168,7 +169,7 @@ producción hardcodeadas (todo vía `.env`, gitignoreado) y el SQL usa SQLAlchem
 2. ~~**[ID-T02] Rotar `SECRET_KEY`**~~ — ✅ hecho (2026-06-15), con guard anti-placeholder.
 3. ~~**[ID-T03] Proteger las páginas web**~~ — ✅ hecho (2026-06-15): sesión por cookie + cambio de password forzado.
 4. **[ID-T04] Ampliar tests** sobre la lógica de negocio y sesiones.
-5. **[ID-T06] Higiene:** reconciliar dependencias (con OK del usuario). _([ID-T05] venv consolidado ✅)_
+5. ~~**[ID-T06] Higiene:** reconciliar dependencias~~ — ✅ hecho (2026-06-15). _([ID-T05] venv consolidado ✅)_
 6. ~~**[ID-T07] `git init`**~~ — ✅ hecho (2026-06-15), commit inicial `836eac1`.
 7. **[ID-T08] Reportes de fase 2** según `PromptModelo`.
 

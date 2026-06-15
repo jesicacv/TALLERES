@@ -29,13 +29,19 @@
 - **Tailwind CSS** — `cdn.tailwindcss.com` con `tallerGreen=#1B6B5A` / `tallerBlue=#1B3F7A`.
 - CSS propio en `app/static/css/app.css`. **Sin** Alpine.js, **sin** build step, **sin** JS a mano (alineado con `PromptModelo §2`).
 
-## Dependencias a RECONCILIAR (declaradas en requirements.txt, sin uso directo en `app/`)
+### Dependencia de test
 
-| Lib | Pin | Situación | Acción sugerida |
-|---|---|---|---|
-| `httpx` | 0.25.2 | **Uso legítimo indirecto:** lo requiere `fastapi.testclient.TestClient` (suite de tests). | Mantener; marcar como dependencia de test. |
-| `aiofiles` | 23.2.1 | **Sin uso** en el código actual (`grep` sin hits en `app/`). | Confirmar si es para una feature futura (uploads/PDF); si no, remover (requiere OK — ver R "no tocar requirements sin aprobación"). |
-| `email-validator` | 2.2.0 | **Sin uso directo:** los schemas usan `str`, no `EmailStr`. Entra como dep de validación de email de Pydantic. | Mantener solo si se planea usar `EmailStr`; documentar o remover. |
+| Lib | Pin | Rol |
+|---|---|---|
+| `httpx` | 0.25.2 | Requerido por `fastapi.testclient.TestClient` (`tests/test_smoke.py`). Marcado como dep de test en `requirements.txt`. |
+
+## Reconciliación de dependencias ([ID-T06], resuelto 2026-06-15)
+
+- **`aiofiles`** y **`email-validator`** se **removieron** de `requirements.txt` y del venv:
+  sin uso en el código (grep sin hits en todo el repo) y sin reverse-deps (`pip show` →
+  `Required-by` vacío). `email-validator` solo haría falta si se adoptara `EmailStr`
+  (hoy los schemas usan `str`). `pip check` limpio y tests 5/5 tras la remoción.
+- **`httpx`** se mantiene (necesario para los tests) y quedó anotado como tal.
 
 > `matplotlib` / `aiosmtplib` mencionados en auditorías de otros proyectos Flex **NO**
 > están en este `requirements.txt` — no aplican aquí.
