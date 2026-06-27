@@ -3,6 +3,9 @@
 > Última actualización: 2026-06-27. Pasos derivados de `AUDIT_REPORT.md` + despliegue.
 > El sistema funciona, la suite (19 tests) pasa y **está desplegado en producción**
 > (https://taller.flexconsultora.cl). Lo que queda es deuda de fase 2 y mejoras, no bloqueante.
+>
+> **PRÓXIMO FOCO (acordado):** revisión de la **funcionalidad y la UI** de la app
+> (recorrido vs `PromptModelo_TallerMecanico.md`, estado real de pantallas/flujos, UX/HTMX).
 
 ## Prioridad 1 — Seguridad (antes de cualquier exposición fuera de localhost)
 
@@ -70,9 +73,17 @@
 > clave privada en `C:\llave_osi\ssh-key-2025-11-18.key` (fuera del repo). MCP `github`
 > conectado (PAT classic scope `repo` en env var `GITHUB_PERSONAL_ACCESS_TOKEN`).
 >
-> **Dónde retomar:** (1) revisión de la app y funcionalidad actual (intención del usuario,
-> aún pendiente); (2) cambiar password del `admin` semilla en el primer login en prod;
-> (3) [ID-T08] Reportes fase 2 (OT por período/técnico/cliente — `ot_repuestos` no tiene
-> total precalculado, usar `costos_service.py`); (4) opcional: espejar repo en GitLab,
-> migrar PAT a fine-grained. **Todo el contenido va en español** (CLAUDE.md §0); ante dudas,
-> consultar y ofrecer opciones (§0.1).
+> **Dónde retomar (foco acordado):** **revisión de la funcionalidad y la UI de la app.**
+> Es decir: recorrer el sistema vs `PromptModelo_TallerMecanico.md`, relevar el estado real de
+> pantallas y flujos (clientes/vehículos, OT, mano de obra/repuestos, checklist, técnicos,
+> seguridad), y la UX/HTMX (modales, cambios de estado de OT, validaciones). Puede hacerse con
+> recorrido en vivo (`run_dev.ps1` o directo sobre https://taller.flexconsultora.cl), inventario
+> funcional, o code review de `app/routes` + `app/templates`. Acordar con el usuario el método.
+>
+> Credencial admin de prod: usuario `admin`, clave en `ADMIN_WEB_PASSWORD` de `.env.deploy`.
+>
+> **Pendientes secundarios:** [ID-T08] Reportes fase 2 (OT por período/técnico/cliente —
+> `ot_repuestos` no tiene total precalculado, usar `costos_service.py`); modal HTMX real para
+> altas/edición; cambio de estado de OT vía `hx-patch`; opcional: espejar repo en GitLab,
+> migrar PAT de GitHub a fine-grained. **Todo el contenido va en español** (CLAUDE.md §0); ante
+> dudas, consultar y ofrecer opciones (§0.1).
