@@ -183,29 +183,33 @@ Las publicaciones del repositorio local **deben sincronizarse con un remoto en G
 GitLab**. Al publicar: configurar el/los remoto(s) (`git remote add ...`) y hacer `git push`
 de la rama `main`. Una vez que se decide publicar, el repo no debe quedar solo en disco.
 
-### 9.2 Despliegue en el servidor vía SSH (a definir al publicar)
+### 9.2 Despliegue en el servidor vía SSH (DESPLEGADO)
 
-El repositorio **debe sincronizarse con el servidor de despliegue mediante técnicas de
-despliegue por SSH**.
+El repositorio se sincroniza con el servidor de despliegue mediante **SSH**. **Desplegado
+el 2026-06-27** en producción: **https://taller.flexconsultora.cl**.
 
-> **Por ahora esto queda solo enunciado.** Cuando se suba/publique el repositorio, si la
-> configuración de despliegue **no está definida**, se debe agregar en ese momento **todo lo
-> necesario** para el despliegue. Parámetros a completar (TBD):
->
-> - Clave SSH (par pública/privada) — TBD
-> - IP del servidor — TBD
-> - Host / hostname — TBD
-> - Usuario de despliegue — TBD
-> - Ruta de destino en el servidor — TBD
-> - Método de sincronización (p. ej. `git pull` en el server, `rsync`, o hook de deploy) — TBD
+- **Servidor:** OCI / Oracle Linux 9, **compartido** con otras apps de Flex (presupuesto,
+  fuerzanatural, n8n). El despliegue de TALLERES es **aditivo**: no toca las demás apps.
+- **App:** uvicorn en `127.0.0.1:8002` (servicio `talleres.service`, systemd `enabled`),
+  detrás de nginx + Certbot (HTTPS, redirect 80→443).
+- **Método de sync:** **`git pull`** en el servidor (repo público). Redespliegue con
+  `deploy/actualizar.sh`.
+- **Runbook completo y artefactos versionados:** [`deploy/README.md`](deploy/README.md),
+  [`deploy/talleres.service`](deploy/talleres.service), [`deploy/taller.conf.example`](deploy/taller.conf.example).
+- **Parámetros sensibles** (IP, usuario SSH, ruta de la clave privada) **NO se versionan**:
+  viven en `.env.deploy` (gitignoreado) en la máquina del operador. El repo es **público**.
 
-### 9.3 Requisitos del servidor de despliegue (obligatorio)
+> Para un despliegue nuevo en otro server, completar esos parámetros en `.env.deploy` y
+> seguir la provisión one-time del runbook. Antes de emitir el certificado, debe existir el
+> registro **DNS A** del subdominio → IP del servidor (acción del dueño del dominio).
+
+### 9.3 Requisitos del servidor de despliegue (obligatorio) — CUMPLIDO
 
 El servidor de despliegue **debe contar con PostgreSQL** y con **todo lo necesario para el
-correcto funcionamiento del sistema**:
+correcto funcionamiento del sistema** (estado actual en `taller.flexconsultora.cl`):
 
-- **PostgreSQL** instalado y accesible (base creada según `.env`).
-- **Python 3.11+** con un entorno virtual y las dependencias de `requirements.txt`.
-- **Variables de entorno** (`.env`) configuradas para el server, con `SECRET_KEY` fuerte,
-  `COOKIE_SECURE=True` (si hay HTTPS) y `CORS_ORIGINS` del dominio real.
-- **Esquema migrado** (`alembic upgrade head`) y **datos base sembrados** (`python -m database.seed`).
+- **PostgreSQL** instalado y accesible — base y rol `talleres` creados (local `:5432`). ✓
+- **Python 3.11+** con venv y las dependencias de `requirements.txt` — instalado 3.11.13. ✓
+- **Variables de entorno** (`.env`) del server con `SECRET_KEY` fuerte, `DEBUG=False`,
+  `COOKIE_SECURE=True` y `CORS_ORIGINS=https://taller.flexconsultora.cl`. ✓
+- **Esquema migrado** (`alembic upgrade head`) y **datos base sembrados** (`python -m database.seed`). ✓

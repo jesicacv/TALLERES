@@ -1,0 +1,32 @@
+# Servicio systemd de TALLERES (Gestion Taller Mecanico, FastAPI).
+#
+# Servidor compartido OCI (Oracle Linux 9): nginx + certbot hacen de reverse proxy
+# de varios sitios. Por eso esta app:
+#   - corre como el usuario existente `opc` (mismo patron que las otras apps),
+#   - escucha SOLO en 127.0.0.1:8002 (8000/8001 estan tomados; nginx le habla),
+#   - vive en /home/opc/proyectos_python/TALLERES y lee su .env del WorkingDirectory.
+#
+# Instalacion en el servidor:
+#   sudo cp deploy/talleres.service /etc/systemd/system/talleres.service
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now talleres
+#   systemctl status talleres   ·   journalctl -u talleres -f
+
+[Unit]
+Description=TALLERES - Gestion Taller Mecanico (FastAPI)
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=exec
+User=opc
+WorkingDirectory=/home/opc/proyectos_python/TALLERES
+ExecStart=/home/opc/proyectos_python/TALLERES/venv/bin/uvicorn main:app --host 127.0.0.1 --port 8002 --workers 2
+Restart=always
+RestartSec=3
+# Endurecimiento basico (la app no necesita escribir en el sistema).
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,8 +1,8 @@
 # NEXT_STEPS.md — TALLERES
 
-> Última actualización: 2026-06-15. Pasos derivados de `AUDIT_REPORT.md`.
-> El sistema funciona y los 3 smoke tests pasan; esto es deuda de robustez/seguridad y
-> de funcionalidad de fase 2, no corrección bloqueante.
+> Última actualización: 2026-06-27. Pasos derivados de `AUDIT_REPORT.md` + despliegue.
+> El sistema funciona, la suite (19 tests) pasa y **está desplegado en producción**
+> (https://taller.flexconsultora.cl). Lo que queda es deuda de fase 2 y mejoras, no bloqueante.
 
 ## Prioridad 1 — Seguridad (antes de cualquier exposición fuera de localhost)
 
@@ -38,15 +38,41 @@
 
 - [x] **Remoto:** publicado en GitHub → `https://github.com/jesicacv/TALLERES` (rama `main`,
       8 commits). Falta opcionalmente espejarlo en GitLab. — [CLAUDE.md §9.1]
-- [ ] **Despliegue SSH (definir al publicar):** al subir el repo, si el despliegue no está
-      definido, agregar **todo lo necesario**: clave SSH, IP del servidor, host, usuario,
-      ruta de destino y método de sync (`git pull`/`rsync`/hook). — [CLAUDE.md §9.2]
-- [ ] **Servidor de despliegue:** provisionar **PostgreSQL** + Python 3.11+ con venv y deps,
-      `.env` del server (con `SECRET_KEY` fuerte, `COOKIE_SECURE=True`, `CORS_ORIGINS` real),
-      `alembic upgrade head` y `python -m database.seed`. — [CLAUDE.md §9.3]
+- [x] **Despliegue SSH:** DESPLEGADO el 2026-06-27 en OCI (Oracle Linux 9, server compartido)
+      → **https://taller.flexconsultora.cl**. uvicorn `127.0.0.1:8002` + `talleres.service`
+      (systemd) + nginx/Certbot (HTTPS). Sync por **`git pull`** (`deploy/actualizar.sh`).
+      Datos sensibles en `.env.deploy` (gitignoreado). Runbook en `deploy/README.md`. — [CLAUDE.md §9.2]
+- [x] **Servidor de despliegue:** provisionado — PostgreSQL (base/rol `talleres`), Python 3.11.13
+      + venv + deps, `.env` del server (`SECRET_KEY` fuerte, `DEBUG=False`, `COOKIE_SECURE=True`,
+      `CORS_ORIGINS=https://taller.flexconsultora.cl`), `alembic upgrade head` + seed. — [CLAUDE.md §9.3]
+- [ ] **Post-despliegue:** cambiar el password del `admin` semilla en el primer login; opcional
+      espejar el repo en GitLab; considerar migrar el PAT de GitHub a fine-grained (mín. privilegio).
 
 ## Fase 2 — Funcionalidad (de `PromptModelo`)
 
 - [ ] **Reportes:** OT por período / por técnico / por cliente-vehículo. — [ID-T08]
 - [ ] Modal HTMX real para altas/edición (hoy varias pantallas usan página de edición dedicada).
 - [ ] Cambio de estado de OT vía `hx-patch` sobre el badge (PromptModelo §8).
+
+## Prompt de continuidad (para retomar en otra sesión)
+
+> Proyecto **TALLERES** (gestión de taller mecánico, FastAPI + HTMX/Tailwind +
+> PostgreSQL/SQLAlchemy). Harness Flex aplicado (T01–T07 cerrados), publicado en
+> **https://github.com/jesicacv/TALLERES** (repo **público**, rama `main`) y **desplegado
+> en producción** el 2026-06-27 en **https://taller.flexconsultora.cl**.
+>
+> **Despliegue (OCI, Oracle Linux 9, server COMPARTIDO de Flex — no pisar presupuesto/fn/n8n):**
+> app en `/home/opc/proyectos_python/TALLERES`, uvicorn `127.0.0.1:8002` vía `talleres.service`
+> (systemd, `enabled`), nginx `conf.d/taller.conf` + Certbot (HTTPS, renovación automática).
+> DB/rol `talleres` en PostgreSQL local. `.env` del server con `DEBUG=False`,
+> `COOKIE_SECURE=True`, `CORS_ORIGINS=https://taller.flexconsultora.cl`. Redespliegue:
+> `git pull` → `deploy/actualizar.sh`. Datos SSH sensibles en `.env.deploy` (gitignoreado);
+> clave privada en `C:\llave_osi\ssh-key-2025-11-18.key` (fuera del repo). MCP `github`
+> conectado (PAT classic scope `repo` en env var `GITHUB_PERSONAL_ACCESS_TOKEN`).
+>
+> **Dónde retomar:** (1) revisión de la app y funcionalidad actual (intención del usuario,
+> aún pendiente); (2) cambiar password del `admin` semilla en el primer login en prod;
+> (3) [ID-T08] Reportes fase 2 (OT por período/técnico/cliente — `ot_repuestos` no tiene
+> total precalculado, usar `costos_service.py`); (4) opcional: espejar repo en GitLab,
+> migrar PAT a fine-grained. **Todo el contenido va en español** (CLAUDE.md §0); ante dudas,
+> consultar y ofrecer opciones (§0.1).
