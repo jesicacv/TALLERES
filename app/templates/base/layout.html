@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{{ app_name }}{% endblock %}</title>
+    <!-- Fuente oficial del sistema: Poppins (Google Fonts). Se carga aqui y no en
+         app.css para que aplique aunque el CSS estatico no cargue. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -13,10 +18,18 @@
                         tallerGreen: "#1B6B5A",
                         tallerBlue: "#1B3F7A",
                     },
+                    fontFamily: {
+                        sans: ["Poppins", "ui-sans-serif", "system-ui", "sans-serif"],
+                    },
                 },
             },
         };
     </script>
+    <!-- Refuerzo: fija Poppins como fuente base sin depender de app.css. El fallback
+         `sans-serif` garantiza que nunca se caiga a una serif si Poppins no carga. -->
+    <style>
+        html, body { font-family: "Poppins", ui-sans-serif, system-ui, sans-serif; }
+    </style>
     <script src="https://unpkg.com/htmx.org@1.9.12"></script>
     <link rel="stylesheet" href="/static/css/app.css">
 </head>

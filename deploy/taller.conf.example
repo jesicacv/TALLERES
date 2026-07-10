@@ -19,16 +19,17 @@ server {
 
     client_max_body_size 10M;
 
+    # /static lo sirve la propia app FastAPI (StaticFiles) via proxy_pass. NO se usa
+    # `alias` a /home/opc/.../app/static porque el home del usuario es 700 y el worker
+    # de nginx no puede atravesarlo -> daria 403. La app corre como `opc` y si puede
+    # leerlo, asi que dejamos que ella sirva los estaticos. (Es una app interna: el
+    # cacheo/`expires` de nginx no aporta lo suficiente como para justificar tocar los
+    # permisos del home compartido.)
     location / {
         proxy_pass         http://127.0.0.1:8002;
         proxy_set_header   Host $host;
         proxy_set_header   X-Real-IP $remote_addr;
         proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header   X-Forwarded-Proto $scheme;
-    }
-
-    location /static/ {
-        alias /home/opc/proyectos_python/TALLERES/app/static/;
-        expires 7d;
     }
 }
