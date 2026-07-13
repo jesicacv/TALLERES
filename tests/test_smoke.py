@@ -19,6 +19,7 @@ from app.models.repuesto import Repuesto
 from app.models.tecnico import Tecnico
 from app.models.usuario import IntentoLogin, Permiso, Sesion, Usuario
 from app.models.vehiculo import Vehiculo
+from config.settings import settings
 from database.base import SessionLocal
 
 
@@ -108,7 +109,12 @@ class AppSmokeTests(unittest.TestCase):
         self.assertIn("version", version.json())
 
     def test_auth_flow_writes_audit_events(self) -> None:
-        login = self.client.post("/auth/login", json={"username": "admin", "password": "Admin123!"})
+        # Credencial del admin sembrado: sale de .env (ADMIN_WEB_USER/ADMIN_WEB_PASSWORD),
+        # no hardcodeada, para que no se rompa al rotar la clave del admin.
+        login = self.client.post(
+            "/auth/login",
+            json={"username": settings.admin_web_user, "password": settings.admin_web_password},
+        )
         self.assertEqual(login.status_code, 200)
 
         token = login.json()["access_token"]

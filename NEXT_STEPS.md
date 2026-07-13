@@ -76,6 +76,29 @@
       No se tocó (regla de despliegue aditivo). Si algún día se quiere arreglar de raíz para todas
       las apps: `chmod 711 /home/opc` — pero es un cambio al server compartido, hay que acordarlo.
 
+## Sesión 2026-07-13 (2) — Tipos de Vehículo oculto + credencial admin desde `.env`
+
+- [x] **"Tipos de Vehículo" eliminado de la UI.** Era una pantalla de **solo lectura** (los "botones"
+      eran cards): el tipo es un `StrEnum` de Python + enum nativo de PostgreSQL, no una tabla, así
+      que nunca tuvo ABM. Decisión: queda como **catálogo interno**, administrable solo por el
+      desarrollador. Se quitó el link del sidebar, la ruta `GET /maestros/tipos-vehiculo` y el
+      template `maestros_tipos_vehiculo.html`. El enum sigue alimentando el `<select>` de vehículos.
+      **Agregar un tipo requiere DOS pasos** (documentado en el docstring de `TipoVehiculoEnum`):
+      migración `ALTER TYPE tipo_vehiculo_enum ADD VALUE` **y** el miembro en el enum de Python —
+      solo por base falla con `LookupError` al leer.
+- [x] **Credencial del admin desde `.env`.** `ADMIN_WEB_USER` / `ADMIN_WEB_PASSWORD` pasaron de ser
+      solo una anotación en `.env.deploy` a **settings reales** (`config/settings.py`, con default al
+      histórico `Admin123!` para no romper el arranque donde no estén definidas). `database/seed.py`
+      las usa al crear el admin, y `debe_cambiar_password` ahora es `True` **solo** si quedó la clave
+      débil por defecto. Documentadas en `.env.example` (junto con `COOKIE_SECURE`).
+- [ ] **Ojo — sin base de test dedicada:** los tests corren contra la **DB de `.env`** (la de dev).
+      `test_smoke.test_auth_flow_writes_audit_events` se loguea con el admin real usando la clave de
+      `.env`, así que **si la clave del admin en la base deja de coincidir con `ADMIN_WEB_PASSWORD`,
+      ese test falla con 401** (fue justamente lo que pasó tras el reseteo manual del 2026-07-13).
+      Opción pendiente si molesta: desacoplar el test a su propio usuario, o crear una DB de test.
+- [ ] **Server:** el `.env` de producción **no** tiene `ADMIN_WEB_PASSWORD`. No es urgente (los
+      settings tienen default, la app arranca igual); solo importaría ante un re-seed desde cero.
+
 ## Fase 2 — Funcionalidad (de `PromptModelo`)
 
 - [ ] **Reportes:** OT por período / por técnico / por cliente-vehículo. — [ID-T08]

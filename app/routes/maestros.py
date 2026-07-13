@@ -461,13 +461,3 @@ def repuestos_delete(codigo: str, request: Request, db: Session = Depends(get_db
             db.rollback()
             raise HTTPException(status_code=400, detail="No se puede eliminar repuesto con items OT asociados")
     return _redirect("/maestros/repuestos")
-
-
-@router.get("/tipos-vehiculo", response_class=HTMLResponse)
-def tipos_vehiculo_page(request: Request) -> HTMLResponse:
-    context = {
-        "request": request,
-        **base_context(),
-        "tipos_vehiculo": [item.value for item in TipoVehiculoEnum],
-    }
-    return templates.TemplateResponse("pages/maestros_tipos_vehiculo.html", context)

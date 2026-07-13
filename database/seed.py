@@ -9,6 +9,7 @@ from passlib.context import CryptContext
 from sqlalchemy import select
 
 from app.models.usuario import Permiso, Rol, RolPermiso, Usuario, UsuarioRol
+from config.settings import DEFAULT_ADMIN_PASSWORD, settings
 from database.base import SessionLocal
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -38,11 +39,15 @@ PERMISOS_BASE = [
 ]
 
 ADMIN_USUARIO = {
-    "username": "admin",
+    "username": settings.admin_web_user,
     "email": "admin@taller.local",
-    "password": "Admin123!",
+    "password": settings.admin_web_password,
     "nombre_completo": "Administrador General",
 }
+
+# Si la clave viene del .env (elegida por quien despliega) no tiene sentido forzar el cambio;
+# solo se fuerza cuando quedo la clave debil por defecto.
+FORZAR_CAMBIO_PASSWORD = settings.admin_web_password == DEFAULT_ADMIN_PASSWORD
 
 
 def get_or_create_roles(session) -> dict[str, Rol]:
@@ -94,7 +99,7 @@ def get_or_create_admin(session, admin_role: Rol) -> Usuario:
             password_hash=pwd_context.hash(ADMIN_USUARIO["password"]),
             nombre_completo=ADMIN_USUARIO["nombre_completo"],
             activo=True,
-            debe_cambiar_password=True,
+            debe_cambiar_password=FORZAR_CAMBIO_PASSWORD,
         )
         session.add(usuario)
         session.flush()
@@ -122,7 +127,8 @@ def run_seed() -> None:
         print("Seed OK")
         print(f"Roles base: {len(roles)}")
         print(f"Permisos base: {len(permisos)}")
-        print(f"Usuario admin: {admin.username} / {ADMIN_USUARIO['password']}")
+        origen = "default (Admin123!)" if FORZAR_CAMBIO_PASSWORD else "ADMIN_WEB_PASSWORD del .env"
+        print(f"Usuario admin: {admin.username} (clave: {origen})")
 
 
 if __name__ == "__main__":

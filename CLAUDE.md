@@ -100,7 +100,11 @@ Requiere un PostgreSQL accesible según `.env` y la base migrada + sembrada:
 .\venv\Scripts\python.exe -m database.seed            # roles, permisos y admin
 ```
 
-**Usuario semilla:** `admin` / `Admin123!` (con `debe_cambiar_password=True`).
+**Usuario semilla:** el seed crea el admin con la credencial de `.env`
+(`ADMIN_WEB_USER` / `ADMIN_WEB_PASSWORD`). Si esas variables no están definidas, cae al default
+histórico `admin` / `Admin123!` **y** marca `debe_cambiar_password=True` (para forzar salir de la
+clave débil conocida); si la clave viene del `.env`, no fuerza el cambio. El seed es idempotente:
+**no pisa la clave de un admin que ya existe** en la base — para rotarla hay que hacerlo a mano.
 
 ## 5. Tests
 

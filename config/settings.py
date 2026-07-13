@@ -11,6 +11,9 @@ _PLACEHOLDER_SECRETS = {
     "secret",
 }
 
+# Clave inicial del admin cuando .env no define ADMIN_WEB_PASSWORD (comportamiento historico).
+DEFAULT_ADMIN_PASSWORD = "Admin123!"
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
@@ -35,6 +38,12 @@ class Settings(BaseSettings):
 
     # Marca la cookie de sesion como Secure (solo HTTPS). Activar en produccion.
     cookie_secure: bool = False
+
+    # Credencial del usuario admin que crea `database/seed.py`. Con default para no
+    # romper el arranque en entornos cuyo .env todavia no las define (p.ej. el server).
+    # Si ADMIN_WEB_PASSWORD queda en el default, el seed marca debe_cambiar_password=True.
+    admin_web_user: str = "admin"
+    admin_web_password: str = DEFAULT_ADMIN_PASSWORD
 
     @property
     def cors_origins_list(self) -> list[str]:
