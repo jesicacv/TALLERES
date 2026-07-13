@@ -21,9 +21,21 @@ echo ">> Migraciones (alembic upgrade head)"
 
 echo ">> Reiniciar servicio"
 sudo systemctl restart talleres
-sleep 3
 systemctl is-active talleres
 
 echo ">> Verificar respuesta local"
-curl -s -o /dev/null -w "/login -> HTTP %{http_code}\n" http://127.0.0.1:8002/login
-echo ">> Listo."
+# Los workers de uvicorn tardan unos segundos en aceptar conexiones: reintentamos en vez
+# de asumir un sleep fijo (con `sleep 3` daba un falso HTTP 000).
+for intento in $(seq 1 15); do
+    codigo=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8002/login || true)
+    if [ "$codigo" = "200" ]; then
+        echo "/login -> HTTP 200 (tras ${intento}s)"
+        echo ">> Listo."
+        exit 0
+    fi
+    sleep 1
+done
+
+echo "ERROR: /login no respondio 200 tras 15s (ultimo codigo: ${codigo:-000})"
+sudo journalctl -u talleres -n 30 --no-pager
+exit 1
