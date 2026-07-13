@@ -1,11 +1,12 @@
 # NEXT_STEPS.md — TALLERES
 
-> Última actualización: 2026-06-27. Pasos derivados de `AUDIT_REPORT.md` + despliegue.
+> Última actualización: 2026-07-13. Pasos derivados de `AUDIT_REPORT.md` + despliegue.
 > El sistema funciona, la suite (19 tests) pasa y **está desplegado en producción**
 > (https://taller.flexconsultora.cl). Lo que queda es deuda de fase 2 y mejoras, no bloqueante.
 >
 > **PRÓXIMO FOCO (acordado):** revisión de la **funcionalidad y la UI** de la app
 > (recorrido vs `PromptModelo_TallerMecanico.md`, estado real de pantallas/flujos, UX/HTMX).
+> La **paridad visual server = local** ya quedó resuelta (ver "Sesión 2026-07-13").
 
 ## Prioridad 1 — Seguridad (antes de cualquier exposición fuera de localhost)
 
@@ -48,8 +49,32 @@
 - [x] **Servidor de despliegue:** provisionado — PostgreSQL (base/rol `talleres`), Python 3.11.13
       + venv + deps, `.env` del server (`SECRET_KEY` fuerte, `DEBUG=False`, `COOKIE_SECURE=True`,
       `CORS_ORIGINS=https://taller.flexconsultora.cl`), `alembic upgrade head` + seed. — [CLAUDE.md §9.3]
-- [ ] **Post-despliegue:** cambiar el password del `admin` semilla en el primer login; opcional
-      espejar el repo en GitLab; considerar migrar el PAT de GitHub a fine-grained (mín. privilegio).
+- [x] **Post-despliegue — acceso admin:** resuelto el 2026-07-13. El `admin` de prod tenía un
+      hash que no correspondía a ninguna clave conocida (ni la semilla ni la de `.env.deploy`),
+      y además `debe_cambiar_password=True` empujaba a la pantalla de cambio forzado. Se reseteó
+      la clave a la que ya declaraba `ADMIN_WEB_PASSWORD` en `.env.deploy`, se puso
+      `debe_cambiar_password=False` y se invalidaron las sesiones activas viejas. Login verificado
+      end-to-end (`POST /login` → 303 + cookie `Secure`; `GET /` → 200). Nota: **no existe bloqueo
+      por intentos fallidos** en el código (`IntentoLogin` solo registra).
+- [ ] **Post-despliegue (resto):** opcional espejar el repo en GitLab; considerar migrar el PAT de
+      GitHub a fine-grained (mín. privilegio).
+
+## Sesión 2026-07-13 — Paridad de UI server = local + acceso admin
+
+- [x] **Fuente oficial Poppins.** No estaba importada en ningún archivo: local se veía bien por
+      el default del sistema, no por diseño. Ahora se carga por **Google Fonts** y se fija como
+      fuente base en `layout.html`, `login.html` y `cambiar_password.html`, vía
+      `tailwind.config.fontFamily.sans` + `<style>` inline, con fallback final `sans-serif`.
+      **Deliberadamente NO va en `app.css`**, para que aplique aunque el CSS estático no cargue.
+- [x] **`/static` daba 403 en el server** → `app.css` no cargaba → el menú lateral salía corrido
+      y sin resaltado. Causa: `/home/opc` es `700` (`drwx------`) y el worker de nginx no puede
+      atravesarlo (`open() failed (13: Permission denied)`; SELinux está *Permissive*, no era él).
+      **Fix:** se eliminó `location /static/` de `taller.conf` → `/static` cae al `proxy_pass` y
+      lo sirve la app FastAPI (corre como `opc`, sí puede leer). Aislado a TALLERES, sin tocar
+      permisos del server compartido. Versionado en `deploy/taller.conf.example`. Commit `e896f9b`.
+- [ ] **Gotcha abierto (otra app):** VF_PRESUPUESTO sufre el **mismo** 403 (`/static/img/logo.png`).
+      No se tocó (regla de despliegue aditivo). Si algún día se quiere arreglar de raíz para todas
+      las apps: `chmod 711 /home/opc` — pero es un cambio al server compartido, hay que acordarlo.
 
 ## Fase 2 — Funcionalidad (de `PromptModelo`)
 
@@ -73,17 +98,31 @@
 > clave privada en `C:\llave_osi\ssh-key-2025-11-18.key` (fuera del repo). MCP `github`
 > conectado (PAT classic scope `repo` en env var `GITHUB_PERSONAL_ACCESS_TOKEN`).
 >
+> **Último trabajo (sesión 2026-07-13, commit `e896f9b`, ya en `main` y desplegado):** se cerró la
+> **paridad visual server = local**. (1) La fuente oficial **Poppins** no estaba importada en
+> ningún lado; ahora se carga por Google Fonts y se fija en `layout.html` / `login.html` /
+> `cambiar_password.html` (`tailwind.config.fontFamily.sans` + `<style>` inline, fallback
+> `sans-serif`) — **a propósito NO en `app.css`**. (2) `/static` daba **403** en el server porque
+> `/home/opc` es `700` y el worker de nginx no puede atravesarlo; se quitó `location /static/` de
+> `taller.conf` y ahora `/static` lo sirve la app por `proxy_pass`. (3) Se desbloqueó el **acceso
+> admin de prod** (hash no coincidía con ninguna clave conocida + `debe_cambiar_password=True`):
+> reseteado a `ADMIN_WEB_PASSWORD`, flag en `False`, sesiones viejas invalidadas, login verificado
+> end-to-end. **Ojo:** no hay bloqueo por intentos fallidos en el código, `IntentoLogin` solo registra.
+>
 > **Dónde retomar (foco acordado):** **revisión de la funcionalidad y la UI de la app.**
 > Es decir: recorrer el sistema vs `PromptModelo_TallerMecanico.md`, relevar el estado real de
 > pantallas y flujos (clientes/vehículos, OT, mano de obra/repuestos, checklist, técnicos,
 > seguridad), y la UX/HTMX (modales, cambios de estado de OT, validaciones). Puede hacerse con
 > recorrido en vivo (`run_dev.ps1` o directo sobre https://taller.flexconsultora.cl), inventario
 > funcional, o code review de `app/routes` + `app/templates`. Acordar con el usuario el método.
+> La UI ya no tiene el desfase visual contra local, así que lo que se vea en prod es representativo.
 >
-> Credencial admin de prod: usuario `admin`, clave en `ADMIN_WEB_PASSWORD` de `.env.deploy`.
+> Credencial admin de prod y de local: usuario `admin`, clave en `ADMIN_WEB_PASSWORD` de
+> `.env.deploy` (ambos entornos quedaron con la misma).
 >
 > **Pendientes secundarios:** [ID-T08] Reportes fase 2 (OT por período/técnico/cliente —
 > `ot_repuestos` no tiene total precalculado, usar `costos_service.py`); modal HTMX real para
-> altas/edición; cambio de estado de OT vía `hx-patch`; opcional: espejar repo en GitLab,
+> altas/edición; cambio de estado de OT vía `hx-patch`; VF_PRESUPUESTO arrastra el **mismo 403 de
+> `/static`** (no se tocó, por la regla de despliegue aditivo); opcional: espejar repo en GitLab,
 > migrar PAT de GitHub a fine-grained. **Todo el contenido va en español** (CLAUDE.md §0); ante
 > dudas, consultar y ofrecer opciones (§0.1).
