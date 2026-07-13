@@ -5,6 +5,8 @@ __pycache__/
 .mypy_cache/
 .env
 .env.deploy
+# Backups del .env que deja deploy/actualizar.sh en el server (contienen secretos).
+.env.bak*
 *.key
 *.pem
 *.pyc

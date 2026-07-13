@@ -90,8 +90,10 @@ def assign_admin_permissions(session, admin_role: Rol, permisos: list[Permiso]) 
             session.add(RolPermiso(rol_id=admin_role.id, permiso_id=permiso.id))
 
 
-def get_or_create_admin(session, admin_role: Rol) -> Usuario:
+def get_or_create_admin(session, admin_role: Rol) -> tuple[Usuario, bool]:
+    """Devuelve (admin, creado). Si ya existia, NO se le pisa la clave."""
     usuario = session.scalar(select(Usuario).where(Usuario.username == ADMIN_USUARIO["username"]))
+    creado = usuario is None
     if usuario is None:
         usuario = Usuario(
             username=ADMIN_USUARIO["username"],
@@ -113,7 +115,7 @@ def get_or_create_admin(session, admin_role: Rol) -> Usuario:
     if assigned is None:
         session.add(UsuarioRol(usuario_id=usuario.id, rol_id=admin_role.id))
 
-    return usuario
+    return usuario, creado
 
 
 def run_seed() -> None:
@@ -121,14 +123,19 @@ def run_seed() -> None:
         roles = get_or_create_roles(session)
         permisos = get_or_create_permisos(session)
         assign_admin_permissions(session, roles["ADMIN"], permisos)
-        admin = get_or_create_admin(session, roles["ADMIN"])
+        admin, creado = get_or_create_admin(session, roles["ADMIN"])
         session.commit()
 
         print("Seed OK")
         print(f"Roles base: {len(roles)}")
         print(f"Permisos base: {len(permisos)}")
-        origen = "default (Admin123!)" if FORZAR_CAMBIO_PASSWORD else "ADMIN_WEB_PASSWORD del .env"
-        print(f"Usuario admin: {admin.username} (clave: {origen})")
+        if creado:
+            origen = "default (Admin123!)" if FORZAR_CAMBIO_PASSWORD else "ADMIN_WEB_PASSWORD del .env"
+            print(f"Usuario admin: {admin.username} CREADO (clave: {origen})")
+        else:
+            # Ojo: el seed no pisa la clave de un admin existente, asi que la clave real
+            # de la base puede no ser la de ADMIN_WEB_PASSWORD. No la anunciamos.
+            print(f"Usuario admin: {admin.username} ya existia (clave sin cambios)")
 
 
 if __name__ == "__main__":
