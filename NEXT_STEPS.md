@@ -96,8 +96,14 @@
       `.env`, así que **si la clave del admin en la base deja de coincidir con `ADMIN_WEB_PASSWORD`,
       ese test falla con 401** (fue justamente lo que pasó tras el reseteo manual del 2026-07-13).
       Opción pendiente si molesta: desacoplar el test a su propio usuario, o crear una DB de test.
-- [ ] **Server:** el `.env` de producción **no** tiene `ADMIN_WEB_PASSWORD`. No es urgente (los
-      settings tienen default, la app arranca igual); solo importaría ante un re-seed desde cero.
+- [x] **Server:** `ADMIN_WEB_USER` / `ADMIN_WEB_PASSWORD` agregadas al `.env` de producción
+      (backup previo `.env.bak-*`, permisos `600`). **Desplegado** (commits `d591b40` + `a336fdd`)
+      y verificado en https://taller.flexconsultora.cl: `/login` 200, login admin 303 + dashboard 200,
+      `/maestros/tipos-vehiculo` → **404**, sidebar sin el link, y el `<select>` de tipos sigue vivo
+      en el alta de vehículos.
+- [x] **`deploy/actualizar.sh`:** el `sleep 3` fijo tras el restart era más corto que el arranque de
+      uvicorn (~5 s), y la verificación final daba un falso `HTTP 000` con el servicio sano. Ahora
+      reintenta hasta 15 s y, si falla, imprime los logs del servicio. Commit `a336fdd`.
 
 ## Fase 2 — Funcionalidad (de `PromptModelo`)
 
@@ -109,43 +115,52 @@
 
 > Proyecto **TALLERES** (gestión de taller mecánico, FastAPI + HTMX/Tailwind +
 > PostgreSQL/SQLAlchemy). Harness Flex aplicado (T01–T07 cerrados), publicado en
-> **https://github.com/jesicacv/TALLERES** (repo **público**, rama `main`) y **desplegado
-> en producción** el 2026-06-27 en **https://taller.flexconsultora.cl**.
+> **https://github.com/jesicacv/TALLERES** (repo **público**, rama `main`) y **desplegado en
+> producción** en **https://taller.flexconsultora.cl** (desde 2026-06-27). Suite: **19/19 OK**.
 >
 > **Despliegue (OCI, Oracle Linux 9, server COMPARTIDO de Flex — no pisar presupuesto/fn/n8n):**
 > app en `/home/opc/proyectos_python/TALLERES`, uvicorn `127.0.0.1:8002` vía `talleres.service`
-> (systemd, `enabled`), nginx `conf.d/taller.conf` + Certbot (HTTPS, renovación automática).
-> DB/rol `talleres` en PostgreSQL local. `.env` del server con `DEBUG=False`,
-> `COOKIE_SECURE=True`, `CORS_ORIGINS=https://taller.flexconsultora.cl`. Redespliegue:
-> `git pull` → `deploy/actualizar.sh`. Datos SSH sensibles en `.env.deploy` (gitignoreado);
-> clave privada en `C:\llave_osi\ssh-key-2025-11-18.key` (fuera del repo). MCP `github`
-> conectado (PAT classic scope `repo` en env var `GITHUB_PERSONAL_ACCESS_TOKEN`).
+> (systemd, `enabled`), nginx `conf.d/taller.conf` + Certbot (HTTPS). DB/rol `talleres` en
+> PostgreSQL local. Redespliegue: `bash deploy/actualizar.sh` en el server (hace `git pull` +
+> deps + `alembic upgrade head` + restart + verifica `/login`). Datos SSH sensibles en
+> `.env.deploy` (gitignoreado); clave privada en `C:\llave_osi\ssh-key-2025-11-18.key`.
+> **Ojo al operar por SSH desde Windows:** Python en modo texto traduce `
+` a `
+` y el bash
+> remoto muere con `$'': command not found` — mandar el script como **bytes**.
 >
-> **Último trabajo (sesión 2026-07-13, commit `e896f9b`, ya en `main` y desplegado):** se cerró la
-> **paridad visual server = local**. (1) La fuente oficial **Poppins** no estaba importada en
-> ningún lado; ahora se carga por Google Fonts y se fija en `layout.html` / `login.html` /
-> `cambiar_password.html` (`tailwind.config.fontFamily.sans` + `<style>` inline, fallback
-> `sans-serif`) — **a propósito NO en `app.css`**. (2) `/static` daba **403** en el server porque
-> `/home/opc` es `700` y el worker de nginx no puede atravesarlo; se quitó `location /static/` de
-> `taller.conf` y ahora `/static` lo sirve la app por `proxy_pass`. (3) Se desbloqueó el **acceso
-> admin de prod** (hash no coincidía con ninguna clave conocida + `debe_cambiar_password=True`):
-> reseteado a `ADMIN_WEB_PASSWORD`, flag en `False`, sesiones viejas invalidadas, login verificado
-> end-to-end. **Ojo:** no hay bloqueo por intentos fallidos en el código, `IntentoLogin` solo registra.
+> **Último trabajo (sesión 2026-07-13 (2), commits `d591b40` y `a336fdd`, desplegados y verificados):**
+> 1. **"Tipos de Vehículo" eliminado de la UI.** El usuario notó que "solo se ven botones" y no podía
+>    dar de alta: era una pantalla de **solo lectura** (los "botones" eran cards) porque el tipo es un
+>    `StrEnum` de Python + enum nativo de PostgreSQL, **no una tabla** — nunca tuvo ABM, y así lo define
+>    la spec. **Decisión del usuario:** queda como catálogo interno, se agrega por base/código si hace
+>    falta, y la opción se oculta. Se quitaron el link del sidebar, la ruta `GET /maestros/tipos-vehiculo`
+>    (hoy **404**) y el template. El enum sigue alimentando el `<select>` de vehículos. **Agregar un tipo
+>    exige DOS pasos** (documentado en el docstring de `TipoVehiculoEnum`): migración `ALTER TYPE
+>    tipo_vehiculo_enum ADD VALUE` **y** el miembro en el enum de Python; solo por base falla con
+>    `LookupError` al leer.
+> 2. **Credencial admin desde `.env`.** `ADMIN_WEB_USER`/`ADMIN_WEB_PASSWORD` eran solo una anotación en
+>    `.env.deploy` — **ningún código las leía**. Ahora son settings reales (`config/settings.py`) que usa
+>    `database/seed.py`, **con default** al histórico `Admin123!` (obligatorias romperían el arranque donde
+>    no estén definidas). `debe_cambiar_password` se fuerza **solo** si quedó la clave débil por defecto.
+>    Ya están en el `.env` local y en el del **server**. El seed sigue siendo idempotente: **no pisa la
+>    clave de un admin existente**.
+> 3. **`deploy/actualizar.sh`:** el `sleep 3` era más corto que el arranque de uvicorn (~5 s) → falso
+>    `HTTP 000`. Ahora reintenta hasta 15 s y vuelca logs si falla.
 >
-> **Dónde retomar (foco acordado):** **revisión de la funcionalidad y la UI de la app.**
-> Es decir: recorrer el sistema vs `PromptModelo_TallerMecanico.md`, relevar el estado real de
-> pantallas y flujos (clientes/vehículos, OT, mano de obra/repuestos, checklist, técnicos,
-> seguridad), y la UX/HTMX (modales, cambios de estado de OT, validaciones). Puede hacerse con
-> recorrido en vivo (`run_dev.ps1` o directo sobre https://taller.flexconsultora.cl), inventario
-> funcional, o code review de `app/routes` + `app/templates`. Acordar con el usuario el método.
-> La UI ya no tiene el desfase visual contra local, así que lo que se vea en prod es representativo.
+> **Dónde retomar (foco acordado):** sigue la **revisión de funcionalidad y UI**, conducida por el
+> usuario: él recorre la app y consulta puntualmente. Método acordado: *"yo reviso y te voy a preguntar
+> según necesidad"* — **no** arrancar un inventario o recorrido completo sin que lo pida.
 >
-> Credencial admin de prod y de local: usuario `admin`, clave en `ADMIN_WEB_PASSWORD` de
-> `.env.deploy` (ambos entornos quedaron con la misma).
+> **Deuda conocida:** (a) **No hay base de test dedicada** — los tests corren contra la DB de `.env` (la
+> de dev), y `test_smoke.test_auth_flow_writes_audit_events` se loguea con el admin real usando
+> `ADMIN_WEB_PASSWORD`: si la clave del admin en la base deja de coincidir con `.env`, ese test falla con
+> **401** (fue exactamente el síntoma de esta sesión). El usuario prefirió esto antes que desacoplar el
+> test a su propio usuario. (b) [ID-T08] Reportes fase 2 (usar `costos_service.py`; `ot_repuestos` no tiene
+> total precalculado). (c) Modal HTMX real para altas/edición; cambio de estado de OT vía `hx-patch`.
+> (d) VF_PRESUPUESTO arrastra el mismo **403 de `/static`** (no se tocó: despliegue aditivo). (e) Opcional:
+> espejar repo en GitLab; migrar PAT de GitHub a fine-grained. (f) **No hay bloqueo por intentos fallidos
+> de login** (`IntentoLogin` solo registra).
 >
-> **Pendientes secundarios:** [ID-T08] Reportes fase 2 (OT por período/técnico/cliente —
-> `ot_repuestos` no tiene total precalculado, usar `costos_service.py`); modal HTMX real para
-> altas/edición; cambio de estado de OT vía `hx-patch`; VF_PRESUPUESTO arrastra el **mismo 403 de
-> `/static`** (no se tocó, por la regla de despliegue aditivo); opcional: espejar repo en GitLab,
-> migrar PAT de GitHub a fine-grained. **Todo el contenido va en español** (CLAUDE.md §0); ante
-> dudas, consultar y ofrecer opciones (§0.1).
+> Credencial admin (prod y local, la misma): usuario `admin`, clave en `ADMIN_WEB_PASSWORD` del `.env`.
+> **Todo el contenido va en español** (CLAUDE.md §0); ante dudas, **consultar y ofrecer opciones** (§0.1).
